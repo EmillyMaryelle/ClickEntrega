@@ -1,5 +1,5 @@
 # ApiProductsRest
-ApiRest web realizada a criação com o CRUD em .Net full.
+ApiRest web realizada a criação com o CRUD em .Net full, banco de dados MySql Server e mongodb, RabbitMQService para messageria
 6. **Documentação:**
    - Inicialize como projeto de inicialização a solução ApiProductsRest
    - <img width="948" alt="image" src="https://github.com/EmillyMaryelle/ApiProductsRest/assets/58406413/54cedcff-4807-49fd-af90-548e4b44657e">
