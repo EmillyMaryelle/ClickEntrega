@@ -18,21 +18,3 @@ Após o clique a tela deverá ser recarregada e retornará a tela home, brinque 
 
 
 
-
-
-
-
-   
-
-   
-
-   
-
-
-
-# Critério de Avaliação:
-Sua solução será avaliada seguindo os seguintes critérios:
-- Qualidade do código
-- Design de componentes e arquitetura
-- Experiência de usuário
-- Performance
