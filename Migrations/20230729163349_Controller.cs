@@ -6,6 +6,8 @@ namespace ApiProductsRest.Migrations
 {
     public partial class Controller : Migration
     {
+     
+ 
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
