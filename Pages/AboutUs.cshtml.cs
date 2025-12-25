@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace ApiProductsRest.Pages
+namespace ClickEntrega.Pages
 {
     public class PrivacyModel : PageModel
     {

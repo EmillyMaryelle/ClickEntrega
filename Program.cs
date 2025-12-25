@@ -1,39 +1,74 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using ApiProductsRest.Data;
-namespace ApiProductsRest
+using ClickEntrega.Data;
+using ClickEntrega.Services; // Add namespace
+using System.Text.Json.Serialization;
+
+namespace ClickEntrega
 {
     public class Program
     {
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            builder.Services.AddDbContext<ApiProductsRestContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("ApiProductsRestContext") ?? throw new InvalidOperationException("Connection string 'ApiProductsRestContext' not found.")));
+            var connectionString = builder.Configuration.GetConnectionString("ClickEntregaContext") 
+                ?? throw new InvalidOperationException("Connection string 'ClickEntregaContext' not found.");
+
+            builder.Services.AddDbContext<ClickEntregaContext>(options =>
+                options.UseNpgsql(connectionString)
+            );
 
             // Add services to the container.
-            builder.Services.AddRazorPages();
+            // builder.Services.AddHostedService<OrderTimeoutService>(); // Register background service
+            
+            // RabbitMQ Services
+            // Use FakeMessageBusService when RabbitMQ is not available
+            builder.Services.AddSingleton<IMessageBusService, FakeMessageBusService>();
+            // builder.Services.AddSingleton<IMessageBusService, MessageBusService>();
+            // builder.Services.AddHostedService<NotificationConsumerService>();
+
+            builder.Services.AddControllers()
+                .AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+            
+            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.CustomSchemaIds(type => type.FullName.Replace("+", "."));
+            });
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            if (!app.Environment.IsDevelopment())
+            // Database initialization
+            using (var scope = app.Services.CreateScope())
             {
-                app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
+                var db = scope.ServiceProvider.GetRequiredService<ClickEntregaContext>();
+                // db.Database.EnsureDeleted(); // CUIDADO: Isso apaga o banco! Use apenas se quiser recriar do zero
+                db.Database.EnsureCreated();
+            }
+
+            // Configure the HTTP request pipeline.
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
 
             app.UseHttpsRedirection();
+            app.UseDefaultFiles();
             app.UseStaticFiles();
 
             app.UseRouting();
 
             app.UseAuthorization();
 
-            app.MapRazorPages();
+            // app.MapRazorPages();
+            app.MapControllers();
+
+            app.MapFallbackToFile("index.html");
 
             app.Run();
         }
     }
 }
+

@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "ApiProductsRest": {
+    "ClickEntrega": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
