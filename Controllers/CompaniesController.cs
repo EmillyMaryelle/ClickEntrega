@@ -34,7 +34,6 @@ namespace ClickEntrega.Controllers
             return Ok(await _context.Company.ToListAsync());
         }
 
-        // GET: api/Companies/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Company>> GetCompany(int id)
         {
