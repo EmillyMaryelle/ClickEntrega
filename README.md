@@ -1,20 +1,48 @@
-# ApiProductsRest
-ApiRest web realizada a criação com o CRUD em .Net full, banco de dados MySql Server e mongodb, RabbitMQService para messageria
-6. **Documentação:**
-   - Inicialize como projeto de inicialização a solução ApiProductsRest
-   - <img width="948" alt="image" src="https://github.com/EmillyMaryelle/ApiProductsRest/assets/58406413/54cedcff-4807-49fd-af90-548e4b44657e">
-   Execute a aplicação no visual studio (recomendado o 2022)
-   <img width="948" alt="image" src="https://github.com/EmillyMaryelle/ApiProductsRest/assets/58406413/d00dfc2d-3e71-4cf2-aa45-1bce2e6f594a">
-   Deverá abrir a tela home, após o ocorrido, clique no campo recomendado
-   <img width="959" alt="image" src="https://github.com/EmillyMaryelle/ApiProductsRest/assets/58406413/d40dca84-c66f-4709-9df0-8a260f7c0848">
-   Após o clique a tela deverá seguir a tela de gerenciamento onde você poderá, inserir, alterar, gerar e deletar dados em uma tabela, a priori vamos inserir.
-<img width="959" alt="image" src="https://github.com/EmillyMaryelle/ApiProductsRest/assets/58406413/e6316162-f2b7-4f8b-90c0-564bd3299659">
-Após o clique a tela devrá seguir para a pagina de cadastro, cadastre seus dados e clique em: Create
-<img width="567" alt="image" src="https://github.com/EmillyMaryelle/ApiProductsRest/assets/58406413/b0496a8f-f19a-45d2-bd3e-704540722e16">
-Após o clique a tela deverá ser recarregada e retornará a tela home, brinque com os campos de vizualizar, editar e deletar dados :)
-<img width="936" alt="image" src="https://github.com/EmillyMaryelle/ApiProductsRest/assets/58406413/76ab9f39-7da2-452b-a63f-de2b857a164a">
-<img width="940" alt="image" src="https://github.com/EmillyMaryelle/ApiProductsRest/assets/58406413/9ecc1b04-4375-40ef-95ef-4a1ea57f529c">
-<img width="946" alt="image" src="https://github.com/EmillyMaryelle/ApiProductsRest/assets/58406413/d8b36787-9433-4d38-a6b2-4f36268a52e4">
+# ClickEntrega
 
+Sistema de gerenciamento de pedidos e entregas, conectando clientes a empresas com funcionalidades de rastreamento em tempo real.
 
+## 🚀 Funcionalidades do Sistema
 
+### 👤 Clientes
+- **Cadastro e Login**: Acesso seguro com email e senha.
+- **Catálogo de Empresas**: Visualização de empresas e seus produtos/cardápios.
+- **Gestão de Pedidos**: Criação de novos pedidos e histórico completo.
+- **Rastreamento em Tempo Real**: Acompanhamento do status do pedido (Aguardando Confirmação, Em Preparo, A Caminho, Entregue).
+- **Notificações**: Recebimento de atualizações sobre o andamento do pedido.
+
+### 🏢 Empresas
+- **Gestão de Cardápio/Produtos**: Cadastro de produtos, preços e categorias.
+- **Gestão de Pedidos**: Painel administrativo para aceitar, recusar e atualizar o status dos pedidos.
+- **Estimativa de Entrega**: Definição de tempo estimado para entrega ao aceitar um pedido.
+- **Gestão de Entregadores**: Cadastro e gerenciamento da frota de entregadores.
+
+### 📦 Sistema de Entregas
+- **Atualização de Status**: Fluxo completo de pedido (Pendente -> Em Preparo -> Saiu para Entrega -> Entregue).
+- **Lógica de Atraso**: Monitoramento automático de pedidos que ultrapassaram a estimativa de entrega.
+
+## 🛠️ Tecnologias Utilizadas
+- **Backend**: .NET 8 (C#)
+- **Banco de Dados**: PostgreSQL (Hospedado no Supabase)
+- **ORM**: Entity Framework Core
+- **Mensageria**: RabbitMQ (com fallback para simulação local)
+- **Frontend**: HTML5, CSS3, JavaScript (Vanilla)
+
+## 🔑 Credenciais de Teste
+
+Utilize as credenciais abaixo para testar as funcionalidades do sistema:
+
+### Conta de Cliente
+- **Email:** `client1@test.com`
+- **Senha:** `password123`
+
+### Conta de Empresa
+- **Nome:** `Test Company 1`
+- **Senha:** `password123`
+
+---
+
+## ⚙️ Configuração Local
+
+O projeto está configurado para conectar-se automaticamente ao banco de dados na nuvem (Supabase).
+Caso o RabbitMQ não esteja instalado localmente, o sistema utilizará automaticamente um serviço simulado (`FakeMessageBusService`) para garantir que a aplicação rode sem erros.

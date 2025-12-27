@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Commerce ClickEntrega</title>
+    <link rel="stylesheet" href="css/style.css?v=7">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="shortcut icon" href="#">
+</head>
+<body>
+    <header id="main-header" style="display: none;">
+        <div class="container">
+            <h1><img src="img/logo.png" alt="Click Entrega" class="site-logo"></h1>
+            <nav id="client-nav">
+                <button id="nav-catalog-link" onclick="app.showCompanyTypes()"><i class="fas fa-home"></i> Menu</button>
+                <button onclick="app.showClientOrders()"><i class="fas fa-list-alt"></i> Acompanhar Pedido</button>
+                <button onclick="app.showCart()"><i class="fas fa-shopping-cart"></i> Carrinho <span id="cart-count" class="badge">0</span></button>
+                <button onclick="app.showNotifications()" class="notification-btn"><i class="fas fa-bell"></i> <span id="notification-badge" class="badge" style="display:none">0</span></button>
+                <button onclick="app.showClientProfile()"><i class="fas fa-user"></i> Minha Conta</button>
+                <button onclick="app.logout()" class="btn-sm"><i class="fas fa-sign-out-alt"></i> Sair</button>
+            </nav>
+            <nav id="admin-nav" style="display: none;">
+                <button onclick="app.showAdminDashboard()"><i class="fas fa-tachometer-alt"></i> Dashboard</button>
+                <button onclick="app.showProductRegistration()"><i class="fas fa-plus-circle"></i> Novo Produto</button>
+                <button onclick="app.showCategoryRegistration()"><i class="fas fa-tags"></i> Nova Categoria</button>
+                <button onclick="app.logout()" class="btn-sm"><i class="fas fa-sign-out-alt"></i> Sair</button>
+            </nav>
+        </div>
+    </header>
+
+    <main id="main-content" class="container">
+        <!-- Dynamic Content will be loaded here -->
+    </main>
+
+    <!-- Templates -->
+    <template id="login-selection-template">
+        <div class="login-selection-container">
+            <h2>Bem-vindo! Como deseja acessar?</h2>
+            <div class="login-options">
+                <div class="login-card" onclick="app.showClientLogin()">
+                    <i class="fas fa-user fa-3x"></i>
+                    <h3>Sou Cliente</h3>
+                    <p>Fazer compras e acompanhar pedidos</p>
+                </div>
+                <div class="login-card" onclick="app.showCompanyLogin()">
+                    <i class="fas fa-building fa-3x"></i>
+                    <h3>Sou Empresa</h3>
+                    <p>Gerenciar produtos e pedidos</p>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="company-login-template">
+        <div class="login-box">
+            <h2>Acesso da Empresa</h2>
+            <div class="form-group">
+                <label class="required">Nome da Empresa:</label>
+                <input type="text" id="login-company-name" class="required" placeholder="Nome da Pizzaria, etc.">
+                <span class="field-error">Este campo é obrigatório</span>
+            </div>
+            <div class="form-group">
+                <label class="required">Senha de Acesso:</label>
+                <input type="password" id="login-company-password" class="required" placeholder="Senha">
+                <span class="field-error">Este campo é obrigatório</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button onclick="app.loginCompany()" class="btn-primary" style="width: 100%;">Entrar</button>
+                <button onclick="app.showCompanyRegistration()" class="btn-secondary" style="width: 100%; background-color: var(--accent);">Nova Empresa? Cadastre-se</button>
+                <button onclick="app.showLoginSelection()" class="btn-secondary">Voltar</button>
+            </div>
+        </div>
+    </template>
+
+    <template id="company-registration-template">
+        <div class="login-box">
+            <h2>Cadastrar Empresa</h2>
+            <div class="form-group">
+                <label class="required">Nome da Empresa:</label>
+                <input type="text" id="new-company-name" class="required" placeholder="Ex: Pizzaria do João">
+                <span class="field-error">Este campo é obrigatório</span>
+            </div>
+            <div class="form-group">
+                <label class="required">Tipo de Empresa:</label>
+                <select id="new-company-type" class="required" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="">Selecione...</option>
+                    <option value="Pizzaria">Pizzaria</option>
+                    <option value="Hamburgueria">Hamburgueria</option>
+                    <option value="Distribuidora">Distribuidora</option>
+                    <option value="Restaurante">Restaurante</option>
+                    <option value="Outro">Outro</option>
+                </select>
+                <span class="field-error">Este campo é obrigatório</span>
+            </div>
+            <div class="form-group">
+                <label class="required">Senha:</label>
+                <input type="password" id="new-company-password" class="required" placeholder="Crie uma senha">
+                <span class="field-error">Este campo é obrigatório</span>
+            </div>
+            <div class="form-actions" style="flex-direction: column; gap: 10px;">
+                <button onclick="app.registerCompany()" class="btn-primary" style="width: 100%;">Cadastrar</button>
+                <button onclick="app.showCompanyLogin()" class="btn-secondary" style="width: 100%;">Voltar para Login</button>
+            </div>
+        </div>
+    </template>
+
+    <template id="admin-dashboard-template">
+        <div class="admin-header">
+            <h2>Painel da Empresa</h2>
+            <div class="admin-tabs">
+                <button onclick="app.showAdminTab('orders')" class="tab-btn active" id="tab-orders">Pedidos</button>
+                <button onclick="app.showAdminTab('products')" class="tab-btn" id="tab-products">Produtos</button>
+                <button onclick="app.showAdminTab('categories')" class="tab-btn" id="tab-categories">Categorias</button>
+                <button onclick="app.showAdminTab('couriers')" class="tab-btn" id="tab-couriers">Entregadores</button>
+            </div>
+        </div>
+
+        <div id="admin-content-orders" class="admin-tab-content">
+            <div class="section-header">
+                <h3>Gerenciamento de Pedidos</h3>
+                <button onclick="app.loadAdminOrders()" class="btn-sm"><i class="fas fa-sync"></i> Atualizar</button>
+            </div>
+            <div id="admin-orders-list" class="order-list">
+                Carregando pedidos...
+            </div>
+        </div>
+
+        <div id="admin-content-products" class="admin-tab-content" style="display: none;">
+            <div class="section-header">
+                <h3>Catálogo de Produtos</h3>
+                <button onclick="app.showProductRegistration()" class="btn-primary"><i class="fas fa-plus"></i> Novo Produto</button>
+            </div>
+            <div id="admin-product-list" class="table-container">
+                Carregando produtos...
+            </div>
+        </div>
+
+        <div id="admin-content-categories" class="admin-tab-content" style="display: none;">
+            <div class="section-header">
+                <h3>Gerenciar Categorias</h3>
+                <button onclick="app.showCategoryRegistration()" class="btn-primary"><i class="fas fa-plus"></i> Nova Categoria</button>
+            </div>
+            <div id="admin-category-list" class="table-container">
+                Carregando categorias...
+            </div>
+        </div>
+
+        <div id="admin-content-couriers" class="admin-tab-content" style="display: none;">
+            <div class="section-header">
+                <h3>Gerenciamento de Entregadores</h3>
+                <button onclick="app.showCourierRegistration()" class="btn-primary"><i class="fas fa-plus"></i> Novo Entregador</button>
+            </div>
+            <div id="admin-courier-list" class="table-container">
+                Carregando entregadores...
+            </div>
+        </div>
+    </template>
+
+
+
+    <template id="category-registration-template">
+        <h2>Cadastrar Nova Categoria</h2>
+        <div class="form-container">
+            <div class="form-group">
+                <label class="required">Nome da Categoria:</label>
+                <input type="text" id="cat-name" class="required" placeholder="Ex: Bebidas">
+                <span class="field-error">Este campo é obrigatório</span>
+            </div>
+            <div class="form-actions">
+                <button onclick="app.registerCategory()" class="btn-primary">Salvar Categoria</button>
+                <button onclick="app.showAdminDashboard()" class="btn-secondary">Cancelar</button>
+            </div>
+        </div>
+    </template>
+
+    <template id="courier-registration-template">
+        <h2>Cadastrar/Editar Entregador</h2>
+        <div class="form-container">
+            <input type="hidden" id="courier-id">
+            <div class="form-group">
+                <label class="required">Nome:</label>
+                <input type="text" id="courier-name" class="required" placeholder="Nome Completo">
+                <span class="field-error">Este campo é obrigatório</span>
+            </div>
+            <div class="form-group">
+                <label>Veículo:</label>
+                <input type="text" id="courier-vehicle" placeholder="Ex: Moto Honda CG 160">
+            </div>
+            <div class="form-group">
+                <label>Telefone:</label>
+                <input type="text" id="courier-phone" placeholder="(XX) XXXXX-XXXX">
+            </div>
+            <div class="form-actions">
+                <button onclick="app.saveCourier()" class="btn-primary">Salvar</button>
+                <button onclick="app.showAdminDashboard()" class="btn-secondary">Cancelar</button>
+            </div>
+        </div>
+    </template>
+
+    <template id="product-registration-template">
+        <h2>Cadastrar Novo Produto</h2>
+        <div class="form-container">
+            <div class="form-group">
+                <label class="required">Nome do Produto:</label>
+                <input type="text" id="prod-name" class="required" placeholder="Ex: Notebook Gamer">
+                <span class="field-error">Este campo é obrigatório</span>
+            </div>
+            <div class="form-group">
+                <label class="required">Preço (R$):</label>
+                <input type="number" id="prod-price" class="required" step="0.01" placeholder="0.00">
+                <span class="field-error">Este campo é obrigatório</span>
+            </div>
+            <div class="form-group">
+                <label>Descrição:</label>
+                <textarea id="prod-desc" rows="3" placeholder="Detalhes do produto..."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="required">Categoria:</label>
+                <select id="prod-category" class="required">
+                    <option value="">Selecione...</option>
+                </select>
+                <span class="field-error">Este campo é obrigatório</span>
+            </div>
+            <div class="form-group">
+                <label>Estoque:</label>
+                <input type="number" id="prod-stock" value="10">
+            </div>
+            <div class="form-group">
+                <label>URL da Imagem:</label>
+                <input type="text" id="prod-img" placeholder="https://...">
+            </div>
+            <div class="form-actions">
+                <button onclick="app.registerProduct()" class="btn-primary">Salvar Produto</button>
+                <button onclick="app.showAdminDashboard()" class="btn-secondary">Cancelar</button>
+            </div>
+        </div>
+    </template>
+
+    <template id="catalog-template">
+        <div id="menu-container" class="menu-container">
+            <!-- Dynamic Categories and Products will be loaded here -->
+        </div>
+    </template>
+
+    <template id="company-type-template">
+        <div class="company-selection-container" style="max-width: 800px; margin: 0 auto; padding: 20px;">
+            <h2 style="text-align: center; margin-bottom: 30px; color: var(--primary);">O que você deseja pedir hoje?</h2>
+            <div id="company-types-grid" class="menu-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));">
+                <!-- Types will be loaded here -->
+            </div>
+        </div>
+    </template>
+
+    <template id="company-list-template">
+        <div class="company-selection-container" style="max-width: 800px; margin: 0 auto; padding: 20px;">
+            <button onclick="app.showCompanyTypes()" class="btn-sm btn-secondary" style="margin-bottom: 20px;">&larr; Voltar para Categorias</button>
+            <h2 id="selected-type-title" style="margin-bottom: 20px; color: var(--primary);">Restaurantes</h2>
+            <div id="companies-grid" class="menu-grid">
+                <!-- Companies will be loaded here -->
+            </div>
+        </div>
+    </template>
+
+    <template id="cart-template">
+        <h2>Seu Carrinho</h2>
+        <div id="cart-items" class="cart-items"></div>
+    </template>
+
+    <template id="client-template">
+        <div class="client-login" id="client-login-area" style="max-width: 400px; margin: 50px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <img src="img/logocombordãosemfundo.png" alt="Logo" style="max-width: 150px; height: auto;">
+            </div>
+            <h2 style="text-align: center; color: var(--primary);">Área do Cliente</h2>
+            <div class="form-group">
+                <label class="required">Email:</label>
+                <input type="email" id="login-client-email" class="required" placeholder="seu@email.com">
+                <span class="field-error">Este campo é obrigatório</span>
+            </div>
+            <div class="form-group">
+                <label class="required">Senha:</label>
+                <input type="password" id="login-client-password" class="required" placeholder="Sua senha">
+                <span class="field-error">Este campo é obrigatório</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button onclick="app.login()" class="btn-primary" style="width: 100%;">Entrar</button>
+                <button onclick="app.showClientRegistration()" class="btn-secondary" style="width: 100%; background-color: var(--accent);">Novo Cliente? Cadastre-se</button>
+                <button onclick="app.showLoginSelection()" class="btn-sm" style="background: none; color: #777; margin-top: 10px;">Voltar ao início</button>
+            </div>
+        </div>
+
+        <div id="client-dashboard" style="display: none;">
+            <div class="user-header">
+                <h2 id="welcome-msg">Bem-vindo!</h2>
+            </div>
+            <h3>Meus Pedidos</h3>
+            <div id="order-history" class="order-list"></div>
+        </div>
+    </template>
+
+    <template id="client-registration-template">
+        <div class="login-box" style="max-width: 500px;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <img src="img/logocombordãosemfundo.png" alt="Logo" style="max-width: 100px; height: auto;">
+            </div>
+            <h2 style="text-align: center;">Criar Nova Conta</h2>
+            <div class="form-group">
+                <label class="required">Nome Completo:</label>
+                <input type="text" id="new-client-name" class="required" placeholder="Seu nome">
+                <span class="field-error">Este campo é obrigatório</span>
+            </div>
+            <div class="form-group">
+                <label class="required">Email:</label>
+                <input type="email" id="new-client-email" class="required" placeholder="seu@email.com">
+                <span class="field-error">Este campo é obrigatório</span>
+            </div>
+            <div class="form-group">
+                <label class="required">Senha (mínimo 6 dígitos):</label>
+                <input type="password" id="new-client-password" class="required" placeholder="Crie uma senha segura">
+                <span class="field-error">Este campo é obrigatório</span>
+            </div>
+            <div class="form-group">
+                <label>Telefone:</label>
+                <input type="text" id="new-client-phone" placeholder="(XX) XXXXX-XXXX">
+            </div>
+            <div class="form-group">
+                <label>Endereço Completo:</label>
+                <input type="text" id="new-client-address" placeholder="Rua, Número, Bairro, CEP">
+            </div>
+            <div class="form-group">
+                <label>Observação:</label>
+                <input type="text" id="new-client-preferences" placeholder="Ex: Sem cebola, Campainha quebrada">
+            </div>
+            <div class="form-actions" style="flex-direction: column; gap: 10px;">
+                <button onclick="app.registerClient()" class="btn-primary" style="width: 100%;">Cadastrar</button>
+                <button onclick="app.showClientLogin()" class="btn-secondary" style="width: 100%;">Voltar para Login</button>
+            </div>
+        </div>
+    </template>
+
+    <template id="client-profile-template">
+        <h2>Meu Perfil</h2>
+        <div class="form-container">
+            <div class="form-group">
+                <label>Nome:</label>
+                <input type="text" id="profile-name">
+            </div>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="profile-email">
+            </div>
+            <div class="form-group">
+                <label>Telefone:</label>
+                <input type="text" id="profile-phone">
+            </div>
+            <div class="form-group">
+                <label>Endereço:</label>
+                <input type="text" id="profile-address">
+            </div>
+            <div class="form-group">
+                <label>Preferências:</label>
+                <textarea id="profile-preferences" rows="3"></textarea>
+            </div>
+            <div class="form-actions">
+                <button onclick="app.updateClientProfile()" class="btn-primary">Salvar Alterações</button>
+                <button onclick="app.showClientArea()" class="btn-secondary">Voltar</button>
+            </div>
+        </div>
+    </template>
+
+    <!-- Review Modal -->
+    <div id="review-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>Avaliar Pedido</h3>
+            <p>Conte-nos como foi sua experiência.</p>
+            <div class="form-group">
+                <label>Nota (1-5):</label>
+                <select id="review-rating" style="width: 100%; padding: 10px;">
+                    <option value="5">⭐⭐⭐⭐⭐ (Excelente)</option>
+                    <option value="4">⭐⭐⭐⭐ (Muito Bom)</option>
+                    <option value="3">⭐⭐⭐ (Bom)</option>
+                    <option value="2">⭐⭐ (Regular)</option>
+                    <option value="1">⭐ (Ruim)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Comentário:</label>
+                <textarea id="review-comment" rows="3" style="width: 100%; padding: 10px;" placeholder="Digite seu comentário..."></textarea>
+            </div>
+            <div class="modal-actions" style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button onclick="app.submitReview()" class="btn-primary">Enviar Avaliação</button>
+                <button onclick="app.closeReviewModal()" class="btn-secondary">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assign Courier Modal -->
+    <div id="assign-courier-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>Atribuir Entregador</h3>
+            <input type="hidden" id="assign-order-id">
+            <div class="form-group">
+                <label>Selecione o Entregador:</label>
+                <select id="assign-courier-select" style="width: 100%; padding: 10px;">
+                    <option value="">Carregando...</option>
+                </select>
+            </div>
+            <div class="modal-actions" style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button onclick="app.confirmAssignCourier()" class="btn-primary">Confirmar</button>
+                <button onclick="app.closeAssignCourierModal()" class="btn-secondary">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Modal -->
+    <div id="custom-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3 id="modal-title">Título</h3>
+            <p id="modal-message">Mensagem</p>
+            <div id="modal-input-container" style="margin: 15px 0;">
+                <input type="text" id="modal-input" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+            <div class="modal-actions" style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button id="modal-confirm-btn" class="btn-primary">Confirmar</button>
+                <button onclick="app.closeModal()" class="btn-secondary">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications Modal -->
+    <div id="notifications-modal" class="modal" style="display: none;">
+        <!-- Content injected from template -->
+    </div>
+
+    <template id="notifications-modal-template">
+        <div class="modal-content" style="max-width: 500px; width: 90%;">
+            <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3>Notificações</h3>
+                <button onclick="app.closeNotificationsModal()" style="background:none; border:none; font-size:1.5em; cursor:pointer;">&times;</button>
+            </div>
+            <div id="notifications-list" style="max-height: 400px; overflow-y: auto;">
+                <!-- Items -->
+            </div>
+        </div>
+    </template>
+
+
+    <div id="alert-modal" class="alert-modal">
+        <div class="alert-modal-content">
+            <div class="alert-modal-header">
+                <h3 class="alert-modal-title">
+                    <i class="alert-modal-icon"></i>
+                    <span id="alert-modal-title-text">Título</span>
+                </h3>
+                <button class="alert-modal-close" onclick="app.closeAlertModal()">&times;</button>
+            </div>
+            <div class="alert-modal-body">
+                <p id="alert-modal-message">Mensagem</p>
+            </div>
+            <div class="alert-modal-footer">
+                <button class="alert-modal-btn" onclick="app.closeAlertModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js?v=22"></script>
+</body>
+</html>
