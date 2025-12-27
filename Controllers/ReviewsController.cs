@@ -21,7 +21,6 @@ namespace ClickEntrega.Controllers
             _context = context;
         }
 
-        // GET: api/Reviews
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Review>>> GetReviews([FromQuery] int? companyId)
         {
@@ -38,7 +37,6 @@ namespace ClickEntrega.Controllers
             return await query.OrderByDescending(r => r.Date).ToListAsync();
         }
 
-        // GET: api/Reviews/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Review>> GetReview(int id)
         {
@@ -52,7 +50,6 @@ namespace ClickEntrega.Controllers
             return review;
         }
 
-        // POST: api/Reviews
         [HttpPost]
         public async Task<ActionResult<Review>> PostReview(Review review)
         {
@@ -63,7 +60,6 @@ namespace ClickEntrega.Controllers
             return CreatedAtAction("GetReview", new { id = review.Id }, review);
         }
 
-        // DELETE: api/Reviews/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReview(int id)
         {
@@ -80,4 +76,3 @@ namespace ClickEntrega.Controllers
         }
     }
 }
-

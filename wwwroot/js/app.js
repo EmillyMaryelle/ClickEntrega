@@ -1,7 +1,7 @@
 const app = {
     cart: [],
     currentUser: null,
-    userRole: null, // 'client' or 'admin'
+    userRole: null, 
     data: {
         categories: [],
         products: [],
@@ -13,7 +13,7 @@ const app = {
         this.cart = JSON.parse(sessionStorage.getItem('cart')) || [];
         this.updateCartCount();
         
-        // Check session
+        
         const savedUser = sessionStorage.getItem('currentUser');
         const savedRole = sessionStorage.getItem('userRole');
         
@@ -22,10 +22,10 @@ const app = {
             this.userRole = savedRole;
         }
 
-        // Inicializar validação de campos
+        
         this.initFieldValidation();
 
-        // Routing Logic
+        
         const path = window.location.pathname.toLowerCase();
         
         if (path === '/cliente') {
@@ -41,7 +41,7 @@ const app = {
                 this.showCompanyLogin();
             }
         } else {
-            // Default behavior
+            
             if (this.currentUser) {
                 if(this.userRole === 'admin') this.showAdminDashboard();
                 else this.showCatalog();
@@ -50,20 +50,20 @@ const app = {
             }
         }
 
-        // Poll for notifications if client
+        
         setInterval(() => {
             if(this.userRole === 'client' && this.currentUser) {
                 this.checkNotifications();
             }
-        }, 30000); // Check every 30s
+        }, 30000); 
 
-        // Handle Back/Forward buttons
+        
         window.onpopstate = () => {
              window.location.reload();
         };
     },
 
-    // --- Navigation & Auth ---
+    
     showLoginSelection: function() {
         history.pushState(null, '', '/');
         this.renderTemplate('login-selection-template');
@@ -78,7 +78,7 @@ const app = {
         history.pushState(null, '', '/cliente');
         this.renderTemplate('client-template');
         this.updateHeader(false);
-        // Garantir que a área de login seja exibida
+        
         const loginArea = document.getElementById('client-login-area');
         const dashboard = document.getElementById('client-dashboard');
         if (loginArea) loginArea.style.display = 'block';
@@ -107,7 +107,7 @@ const app = {
         const name = nameField.value ? nameField.value.trim() : '';
         const password = passwordField.value ? passwordField.value.trim() : '';
         
-        // Validação de campos obrigatórios
+        
         let hasError = false;
         if (!name) {
             nameField.classList.add('error');
@@ -146,7 +146,7 @@ const app = {
             if (response.ok) {
                 const company = await response.json();
                 this.currentUser = company;
-                this.userRole = 'admin'; // Keep role as 'admin' for dashboard access
+                this.userRole = 'admin'; 
                 this.saveSession();
                 this.showAdminDashboard();
             } else {
@@ -194,19 +194,9 @@ const app = {
         let type = typeField.value ? typeField.value.trim() : '';
         const password = passwordField.value ? passwordField.value.trim() : '';
         
-        // Handle 'Outro' type
-        if (type === 'Outro' && manualTypeField) {
-            const manualType = manualTypeField.value ? manualTypeField.value.trim() : '';
-            if (manualType) {
-                type = manualType;
-            } else {
-                // If manual type is empty, we will catch it in validation below if we handle it
-                // Ideally, we treat 'Outro' as invalid if manual is empty
-                type = ''; // Reset type to force validation error if manual is empty
-            }
-        }
 
-        // Validação de campos obrigatórios
+
+        
         let hasError = false;
         if (!name) {
             nameField.classList.add('error');
@@ -284,7 +274,7 @@ const app = {
         const email = emailField.value ? emailField.value.trim() : '';
         const password = passwordField.value ? passwordField.value.trim() : '';
         
-        // Validação de campos obrigatórios
+        
         let hasError = false;
         if (!email) {
             emailField.classList.add('error');
@@ -366,9 +356,9 @@ const app = {
             } else {
                 clientNav.style.display = 'block';
                 adminNav.style.display = 'none';
-                this.checkNotifications(); // Update badge
+                this.checkNotifications(); 
 
-                // Toggle Catalog Link
+                
                 const catalogLink = document.getElementById('nav-catalog-link');
                 if (catalogLink) {
                     catalogLink.style.display = this.data.currentCompanyId ? 'inline-block' : 'none';
@@ -377,7 +367,7 @@ const app = {
         }
     },
 
-    // --- Company Selection ---
+    
     showCompanyTypes: async function() {
         history.pushState(null, '', '/tipos');
         this.updateHeader(this.currentUser != null);
@@ -389,9 +379,9 @@ const app = {
         try {
             const response = await fetch('/api/Companies');
             const companies = await response.json();
-            this.data.companies = companies; // Cache companies
+            this.data.companies = companies; 
             
-            // Get unique types
+            
             const types = [...new Set(companies.map(c => c.type))];
             
             container.innerHTML = '';
@@ -402,7 +392,7 @@ const app = {
 
             types.forEach(type => {
                 const div = document.createElement('div');
-                div.className = 'menu-item'; // Reuse styling
+                div.className = 'menu-item'; 
                 div.style.cursor = 'pointer';
                 div.style.display = 'flex';
                 div.style.alignItems = 'center';
@@ -426,7 +416,7 @@ const app = {
         document.getElementById('selected-type-title').textContent = type;
         
         const container = document.getElementById('companies-grid');
-        // Filter from cached companies
+        
         const companies = this.data.companies.filter(c => c.type === type);
         
         container.innerHTML = '';
@@ -445,7 +435,7 @@ const app = {
         });
     },
 
-    // --- Client Views ---
+    
     showCatalog: async function(companyId) {
         if (!companyId && this.data.currentCompanyId) {
             companyId = this.data.currentCompanyId;
@@ -459,7 +449,7 @@ const app = {
         sessionStorage.setItem('currentCompanyId', companyId);
 
         history.pushState(null, '', '/cliente');
-        this.userRole = 'client'; // Default context
+        this.userRole = 'client'; 
         this.updateHeader(true);
         this.renderTemplate('catalog-template');
         await this.renderMenu();
@@ -475,7 +465,7 @@ const app = {
         container.innerHTML = '<p>Carregando menu...</p>';
 
         try {
-            // Load Categories, Products and Company Info
+            
             const [catRes, prodRes, compRes] = await Promise.all([
                 fetch(`/api/Categories?companyId=${companyId}`),
                 fetch(`/api/Products?companyId=${companyId}`),
@@ -494,7 +484,7 @@ const app = {
 
             container.innerHTML = '';
 
-            // Render Categories Filter
+            
             const filterDiv = document.createElement('div');
             filterDiv.className = 'category-filter';
             filterDiv.innerHTML = `
@@ -505,15 +495,15 @@ const app = {
             `;
             container.appendChild(filterDiv);
 
-            // Filter Products
+            
             let productsToShow = this.data.products;
             if(filterCategoryId) {
-                // Ensure ID is a number
+                
                 filterCategoryId = Number(filterCategoryId);
                 productsToShow = productsToShow.filter(p => p.categoryId === filterCategoryId);
             }
 
-            // Render Products
+            
             const grid = document.createElement('div');
             grid.className = 'menu-grid';
 
@@ -552,7 +542,7 @@ const app = {
         this.renderTemplate('cart-template');
         this.renderCartItems();
         
-        // Auto-fill client ID if logged in
+        
         if(this.currentUser && this.currentUser.id) {
             const input = document.getElementById('checkout-client-id');
             if(input) {
@@ -563,7 +553,7 @@ const app = {
     },
 
     addToCart: function(productId) {
-        // Ensure ID is a number
+        
         const id = Number(productId);
         const product = this.data.products.find(p => p.id === id);
         if(!product) return;
@@ -626,7 +616,7 @@ const app = {
             return;
         }
 
-        // Group by company
+        
         const companies = {};
         this.cart.forEach(item => {
             const cId = item.companyId || 'unknown';
@@ -639,7 +629,7 @@ const app = {
             companies[cId].items.push(item);
         });
 
-        // Render each company group
+        
         Object.keys(companies).forEach(companyId => {
             const group = companies[companyId];
             const groupDiv = document.createElement('div');
@@ -649,7 +639,7 @@ const app = {
             groupDiv.style.marginBottom = '20px';
             groupDiv.style.borderRadius = '8px';
 
-            // Header with Collapse Button
+            
             const headerDiv = document.createElement('div');
             headerDiv.style.display = 'flex';
             headerDiv.style.justifyContent = 'space-between';
@@ -665,7 +655,7 @@ const app = {
             `;
             groupDiv.appendChild(headerDiv);
 
-            // Collapsible Content
+            
             const contentDiv = document.createElement('div');
             contentDiv.id = `cart-group-content-${companyId}`;
             contentDiv.style.display = 'block';
@@ -687,7 +677,7 @@ const app = {
                 contentDiv.appendChild(itemDiv);
             });
 
-            // Summary and Checkout for this group
+            
             if (companyId !== 'unknown') {
                 const userAddress = this.currentUser ? (this.currentUser.address || '') : '';
                 const userPrefs = this.currentUser ? (this.currentUser.preferences || '') : '';
@@ -775,7 +765,7 @@ const app = {
             addrInput.style.backgroundColor = '#e9ecef';
             obsInput.style.backgroundColor = '#e9ecef';
         } else {
-            // 'other'
+            
             addrInput.value = '';
             obsInput.value = '';
             addrInput.readOnly = false;
@@ -797,7 +787,7 @@ const app = {
             return;
         }
 
-        // Filter items for this company
+        
         const itemsToOrder = this.cart.filter(i => {
             const cId = i.companyId || 'unknown';
             return cId == companyId;
@@ -813,7 +803,7 @@ const app = {
         const order = {
             clientId: clientId,
             companyId: companyId,
-            status: 0, // Pending
+            status: 0, 
             totalAmount: totalAmount,
             observations: observations,
             items: itemsToOrder.map(i => ({
@@ -844,7 +834,7 @@ const app = {
             if(response.ok) {
                 this.showAlertModal('success', 'Sucesso', 'Pedido realizado com sucesso!');
                 
-                // Remove only ordered items from cart
+                
                 this.cart = this.cart.filter(i => {
                      const cId = i.companyId || 'unknown';
                      return cId != companyId;
@@ -864,10 +854,10 @@ const app = {
         }
     },
 
-    // --- Client Area ---
+    
     showClientArea: function() {
         this.renderTemplate('client-template');
-        // this.updateHeader(true); // Moved inside condition
+        
         if (this.currentUser && this.userRole === 'client') {
             this.updateHeader(true);
             document.getElementById('client-login-area').style.display = 'none';
@@ -895,7 +885,7 @@ const app = {
         const email = emailField.value ? emailField.value.trim() : '';
         const password = passwordField.value ? passwordField.value.trim() : '';
         
-        // Validação de campos obrigatórios
+        
         let hasError = false;
         if (!name) {
             nameField.classList.add('error');
@@ -1028,9 +1018,9 @@ const app = {
             this.showClientArea();
             return;
         }
-        // If we are already in client dashboard, just ensure orders are visible
-        // But here we might want a standalone view or just scroll to it
-        this.showClientArea(); // Reuse the dashboard view which has orders
+        
+        
+        this.showClientArea(); 
     },
 
     loadClientOrders: async function() {
@@ -1060,7 +1050,7 @@ const app = {
                 
                 const statusInfo = this.getOrderStatusDisplay(o);
 
-                // Check Delay
+                
                 let estimateText = 'Aguardando definição';
                 if(o.estimatedDeliveryTime) {
                     estimateText = this.formatTime(o.estimatedDeliveryTime);
@@ -1074,7 +1064,7 @@ const app = {
                 });
 
                 let actions = '';
-                if(o.status === 5) { // Delivered
+                if(o.status === 5) { 
                     if (o.review) {
                          const stars = '⭐'.repeat(o.review.rating);
                          actions = `
@@ -1114,7 +1104,7 @@ const app = {
         }
     },
 
-    // --- Notifications ---
+    
     checkNotifications: async function() {
         if(!this.currentUser || this.userRole !== 'client') return;
         try {
@@ -1128,7 +1118,7 @@ const app = {
                 badge.style.display = unread > 0 ? 'inline-block' : 'none';
             }
             
-            // Toast Notification Logic
+            
             const maxId = notifs.length > 0 ? Math.max(...notifs.map(n => n.id)) : 0;
             
             if (this.lastNotificationId === 0) {
@@ -1163,7 +1153,7 @@ const app = {
 
         container.appendChild(toast);
 
-        // Remove automatically after 5s (animation handles fade out)
+        
         setTimeout(() => {
             if (toast.parentElement) {
                 toast.remove();
@@ -1196,7 +1186,7 @@ const app = {
                 `;
                 
                 if(!n.isRead) {
-                    // Mark as read when displayed (or we could add a button)
+                    
                     this.markNotificationRead(n.id);
                 }
                 
@@ -1208,7 +1198,7 @@ const app = {
     markNotificationRead: async function(id) {
         try {
             await fetch(`/api/Notifications/${id}/Read`, { method: 'PUT' });
-            this.checkNotifications(); // Refresh badge
+            this.checkNotifications(); 
         } catch(e) { console.error(e); }
     },
 
@@ -1216,21 +1206,21 @@ const app = {
         document.getElementById('notifications-modal').style.display = 'none';
     },
 
-    // --- Admin Dashboard ---
+    
     showAdminDashboard: function() {
         history.pushState(null, '', '/empresa');
         this.userRole = 'admin';
         this.updateHeader(true);
         this.renderTemplate('admin-dashboard-template');
-        this.showAdminTab('orders'); // Default tab
+        this.showAdminTab('orders'); 
     },
 
     showAdminTab: function(tabName) {
-        // Tabs UI
+        
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(`tab-${tabName}`).classList.add('active');
         
-        // Content UI
+        
         document.querySelectorAll('.admin-tab-content').forEach(c => c.style.display = 'none');
         document.getElementById(`admin-content-${tabName}`).style.display = 'block';
 
@@ -1291,7 +1281,7 @@ const app = {
         try {
             const response = await fetch(`/api/Orders?companyId=${this.currentUser.id}`, { cache: 'no-store' });
             const orders = await response.json();
-            console.log('Admin Orders:', orders); // Debug
+            console.log('Admin Orders:', orders); 
             
             const activeOrders = orders.sort((a,b) => new Date(b.orderDate) - new Date(a.orderDate));
 
@@ -1308,26 +1298,26 @@ const app = {
                 const statusInfo = this.getOrderStatusDisplay(o);
                 
                 let actions = '';
-                // Status Transitions
-                if(o.status === 0) { // Pending
+                
+                if(o.status === 0) { 
                     actions = `
                         <button onclick="app.acceptOrder('${o.id}')" class="btn-success">Aceitar</button>
                         <button onclick="app.rejectOrder('${o.id}')" class="btn-secondary" style="background: var(--color-5); color:white;">Rejeitar</button>
                     `;
-                } else if(o.status === 1) { // Confirmed
+                } else if(o.status === 1) { 
                     actions = `<button onclick="app.updateOrderStatus('${o.id}', 2)" class="btn-primary">Iniciar Preparo</button>`;
-                } else if(o.status === 2) { // Preparation
+                } else if(o.status === 2) { 
                     actions = `<button onclick="app.updateOrderStatus('${o.id}', 4)" class="btn-primary">Saiu para Entrega</button>`;
-                } else if(o.status === 4) { // Out for Delivery
+                } else if(o.status === 4) { 
                     actions = `<button onclick="app.updateOrderStatus('${o.id}', 5)" class="btn-primary" style="background:var(--color-3);">Confirmar Entrega</button>`;
                 }
 
-                // Problem Report Button (available for active orders)
+                
                 if(o.status !== 5 && o.status !== 6) {
                     actions += `<button onclick="app.reportOrderIssue('${o.id}', '${o.clientId}')" class="btn-sm" style="margin-left: 10px; background: var(--color-1); color: white;">Notificar Problema</button>`;
                 }
 
-                // Assign Courier Button (for confirmed/prep/ready/out)
+                
                 if(o.status >= 1 && o.status < 5) {
                     actions += `<button onclick="app.showAssignCourierModal('${o.id}')" class="btn-sm" style="margin-left: 10px; background: var(--color-4); color: white;">Entregador</button>`;
                 }
@@ -1336,7 +1326,7 @@ const app = {
                     day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
                 });
                 
-                // Informações de pagamento
+                
                 const paymentMethod = o.payment ? 
                     (o.payment.method === 0 ? 'Dinheiro' : o.payment.method === 1 ? 'Cartão' : o.payment.method === 2 ? 'PIX' : 'Outro') : 
                     'Não informado';
@@ -1344,7 +1334,7 @@ const app = {
                     (o.payment.status === 0 ? 'Pendente' : o.payment.status === 1 ? 'Pago' : 'Cancelado') : 
                     'N/A';
                 
-                // Telefone do cliente
+                
                 const clientPhone = o.client && o.client.phone ? o.client.phone : 'Não informado';
                 
                 div.innerHTML = `
@@ -1554,8 +1544,8 @@ const app = {
         this.renderTemplate('courier-registration-template');
         if(id) {
             try {
-                // Fetch details if editing
-                const response = await fetch('/api/Couriers'); // Or specific get if available, using list for now
+                
+                const response = await fetch('/api/Couriers'); 
                 const couriers = await response.json();
                 const courier = couriers.find(c => c.id === id);
                 if(courier) {
@@ -1578,7 +1568,7 @@ const app = {
         
         const name = nameField.value ? nameField.value.trim() : '';
         
-        // Validação de campo obrigatório
+        
         if (!name) {
             nameField.classList.add('error');
             const errorMsg = nameField.parentElement?.querySelector('.field-error');
@@ -1632,7 +1622,7 @@ const app = {
         } catch(e) { console.error(e); }
     },
 
-    // --- Assignment ---
+    
     showAssignCourierModal: async function(orderId) {
         const modal = document.getElementById('assign-courier-modal');
         document.getElementById('assign-order-id').value = orderId;
@@ -1686,7 +1676,7 @@ const app = {
         } catch(e) { console.error(e); }
     },
 
-    // --- Admin Actions ---
+    
     updateOrderStatus: async function(id, status, reason = null, estimatedDeliveryTime = null) {
         try {
             const body = { 
@@ -1701,14 +1691,14 @@ const app = {
             });
 
             if(response.ok) {
-                // If confirmed with time, send notification
-                if(status === 2 && estimatedDeliveryTime) { // Preparation implies confirmed/accepted
-                    // Actually status 1 is Confirmed, 2 is Preparation. 
-                    // My logic in acceptOrder sets status 2 directly.
-                    // Let's send a notification about the estimate.
-                    // We need to fetch order to get client ID if we don't have it handy?
-                    // But we can just assume the backend might do it, or we do it here.
-                    // For now, let's keep it simple.
+                
+                if(status === 2 && estimatedDeliveryTime) { 
+                    
+                    
+                    
+                    
+                    
+                    
                 }
                 this.showAlertModal('success', 'Sucesso', 'Pedido atualizado!');
                 this.loadAdminOrders();
@@ -1736,7 +1726,7 @@ const app = {
                 
                 const estTime = new Date();
                 estTime.setMinutes(estTime.getMinutes() + minutesInt);
-                this.updateOrderStatus(id, 2, null, estTime.toISOString()); // Go to Preparation
+                this.updateOrderStatus(id, 2, null, estTime.toISOString()); 
             }
         );
     },
@@ -1749,7 +1739,7 @@ const app = {
             "",
             (val) => {
                 if(!val) return;
-                this.updateOrderStatus(id, 6, val); // Cancelled
+                this.updateOrderStatus(id, 6, val); 
             }
         );
     },
@@ -1774,8 +1764,8 @@ const app = {
                         })
                     });
                     this.showAlertModal('notification', 'Notificação', "Notificação enviada!");
-                    // Also update order status to 'Problem' (7) if desired, but optional
-                    // this.updateOrderStatus(orderId, 7, msg); 
+                    
+                    
                 } catch(e) {
                     console.error(e);
                     this.showAlertModal('error', 'Erro', "Erro ao enviar notificação.");
@@ -1798,7 +1788,7 @@ const app = {
         const price = parseFloat(priceField.value);
         const categoryId = categoryField.value;
         
-        // Validação de campos obrigatórios
+        
         let hasError = false;
         if (!name) {
             nameField.classList.add('error');
@@ -1868,9 +1858,9 @@ const app = {
     deleteProduct: async function(id) {
         if(!confirm("Tem certeza que deseja excluir?")) return;
         try {
-            // Note: API might not support DELETE Product yet, assuming standard scaffold
-            // If not, I need to add it to controller.
-            // Wait, standard scaffold usually has it.
+            
+            
+            
              await fetch(`/api/Products/${id}`, { method: 'DELETE' });
              this.loadAdminProducts();
         } catch(e) {
@@ -1889,7 +1879,7 @@ const app = {
         
         const name = nameField.value ? nameField.value.trim() : '';
         
-        // Validação de campo obrigatório
+        
         if (!name) {
             nameField.classList.add('error');
             const errorMsg = nameField.parentElement?.querySelector('.field-error');
@@ -1952,11 +1942,11 @@ const app = {
         } catch (error) { console.error(error); }
     },
 
-    // --- Reviews ---
+    
     openReviewModal: function(orderId) {
         const modal = document.getElementById('review-modal');
         modal.style.display = 'flex';
-        // Save orderId in a data attribute or global
+        
         modal.dataset.orderId = orderId;
     },
 
@@ -1966,18 +1956,18 @@ const app = {
 
     submitReview: async function() {
         const modal = document.getElementById('review-modal');
-        const orderId = modal.dataset.orderId; // Note: Review is linked to Client, not Order directly in model, but conceptually it is.
-        // Wait, Review model has ClientId, Rating, Comment, Date. No OrderId.
-        // So we are reviewing the "Service" generally or we should add OrderId to Review?
-        // User asked for "Service evaluation".
-        // I'll just submit it as a client review.
+        const orderId = modal.dataset.orderId; 
+        
+        
+        
+        
         
         const rating = document.getElementById('review-rating').value;
         const comment = document.getElementById('review-comment').value;
 
         const review = {
             clientId: this.currentUser.id,
-            orderId: parseInt(orderId), // Ensure orderId is included
+            orderId: parseInt(orderId), 
             rating: parseInt(rating),
             comment: comment,
             date: new Date().toISOString()
@@ -1993,14 +1983,14 @@ const app = {
             if(response.ok) {
                 this.showAlertModal('success', 'Sucesso', 'Obrigado pela avaliação!');
                 this.closeReviewModal();
-                this.loadClientOrders(); // Refresh to show stars
+                this.loadClientOrders(); 
             } else {
                 this.showAlertModal('error', 'Erro', 'Erro ao enviar avaliação.');
             }
         } catch(e) { console.error(e); }
     },
 
-    // --- Utils ---
+    
     renderTemplate: function(templateId) {
         const template = document.getElementById(templateId);
         const content = document.getElementById('main-content');
@@ -2021,7 +2011,7 @@ const app = {
         else if (o.status === 6) { statusText = 'Cancelado'; statusColor = '#e74c3c'; }
         else if (o.status === 7) { statusText = 'Problema'; statusColor = '#c0392b'; }
 
-        // Check Delay
+        
         if (o.status !== 5 && o.status !== 6 && o.estimatedDeliveryTime) {
             const now = new Date();
             const estimated = new Date(o.estimatedDeliveryTime);
@@ -2042,7 +2032,7 @@ const app = {
         } catch(e) { return 'Erro Data'; }
     },
 
-    // Modal Helper
+    
     modalCallback: null,
     openModal: function(title, message, placeholder, defaultValue, callback) {
         document.getElementById('modal-title').textContent = title;
@@ -2056,7 +2046,7 @@ const app = {
         
         this.modalCallback = callback;
         
-        // Remove old listeners by cloning
+        
         const btn = document.getElementById('modal-confirm-btn');
         const newBtn = btn.cloneNode(true);
         btn.parentNode.replaceChild(newBtn, btn);
@@ -2071,7 +2061,7 @@ const app = {
         this.modalCallback = null;
     },
 
-    // --- Modais de Alerta ---
+    
     showAlertModal: function(type, title, message, customButton = null) {
         const modal = document.getElementById('alert-modal');
         if (!modal) return;
@@ -2081,13 +2071,13 @@ const app = {
         const iconEl = modal.querySelector('.alert-modal-icon');
         const footerEl = modal.querySelector('.alert-modal-footer');
         
-        // Remove todas as classes de tipo
+        
         modal.className = 'alert-modal';
         
-        // Adiciona classe do tipo
+        
         modal.classList.add(`alert-modal-${type}`);
         
-        // Define ícone baseado no tipo
+        
         const icons = {
             'success': 'fas fa-check-circle',
             'error': 'fas fa-exclamation-circle',
@@ -2099,7 +2089,7 @@ const app = {
         titleEl.textContent = title;
         messageEl.textContent = message;
         
-        // Configura botões do footer
+        
         if (customButton) {
             footerEl.innerHTML = `
                 <button class="alert-modal-btn alert-modal-btn-custom" onclick="${customButton.onclick}">${customButton.text}</button>
@@ -2111,7 +2101,7 @@ const app = {
         
         modal.classList.add('show');
         
-        // Fecha ao clicar fora
+        
         const closeOnOutsideClick = (e) => {
             if (e.target === modal) {
                 this.closeAlertModal();
@@ -2128,27 +2118,27 @@ const app = {
         }
     },
 
-    // --- Validação de Campos Obrigatórios ---
+    
     validateRequiredFields: function(containerId) {
-        // Procura campos obrigatórios no container especificado ou em todo o documento
+        
         const container = containerId ? document.getElementById(containerId) : document;
         if (!container) return false;
         
         let isValid = true;
-        // Procura todos os campos obrigatórios no container ou no documento
+        
         const requiredFields = container.querySelectorAll ? 
             container.querySelectorAll('input.required, textarea.required, select.required') :
             document.querySelectorAll('input.required, textarea.required, select.required');
         
         if (requiredFields.length === 0) {
-            // Se não encontrou campos obrigatórios, considera válido (pode não ter campos obrigatórios)
+            
             return true;
         }
         
         requiredFields.forEach(field => {
             const errorMsg = field.parentElement ? field.parentElement.querySelector('.field-error') : null;
             
-            // Para select, verifica se tem valor selecionado
+            
             if (field.tagName === 'SELECT') {
                 if (!field.value || field.value === '') {
                     field.classList.add('error');
@@ -2159,7 +2149,7 @@ const app = {
                     if (errorMsg) errorMsg.classList.remove('show');
                 }
             } else {
-                // Para input e textarea
+                
                 if (!field.value || field.value.trim() === '') {
                     field.classList.add('error');
                     if (errorMsg) errorMsg.classList.add('show');
@@ -2172,7 +2162,7 @@ const app = {
         });
         
         if (!isValid) {
-            // Mostra mensagem de erro se houver campos inválidos
+            
             const firstInvalidField = container.querySelector ? 
                 container.querySelector('input.required.error, textarea.required.error, select.required.error') :
                 document.querySelector('input.required.error, textarea.required.error, select.required.error');
@@ -2184,7 +2174,7 @@ const app = {
         return isValid;
     },
 
-    // Adiciona validação em tempo real
+    
     initFieldValidation: function() {
         document.addEventListener('input', (e) => {
             if (e.target.classList.contains('required')) {
@@ -2219,7 +2209,7 @@ const app = {
     }
 };
 
-// Init
+
 document.addEventListener('DOMContentLoaded', () => {
     app.init();
 });

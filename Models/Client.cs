@@ -13,9 +13,8 @@ namespace ClickEntrega.Models
         public string Password { get; set; } = string.Empty;
         public string Phone { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
-        public string Preferences { get; set; } = string.Empty; // JSON or text
+        public string Preferences { get; set; } = string.Empty;
 
-        // Navigation
         public List<Order> Orders { get; set; } = new();
         public List<Review> Reviews { get; set; } = new();
     }

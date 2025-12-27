@@ -24,14 +24,13 @@ namespace ClickEntrega.Controllers
             _messageBus = messageBus;
         }
 
-        // GET: api/Orders
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Order>>> GetOrder([FromQuery] int? companyId)
         {
             var query = _context.Order
                 .Include(o => o.Client)
                 .Include(o => o.Items)
-                    .ThenInclude(i => i.Product) // Include Product details
+                    .ThenInclude(i => i.Product)
                 .Include(o => o.Delivery)
                     .ThenInclude(d => d.Courier)
                 .AsQueryable();
@@ -44,7 +43,6 @@ namespace ClickEntrega.Controllers
             return Ok(await query.ToListAsync());
         }
 
-        // GET: api/Orders/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Order>> GetOrder(int id)
         {
@@ -65,7 +63,6 @@ namespace ClickEntrega.Controllers
             return Ok(order);
         }
 
-        // GET: api/Orders/Client/5
         [HttpGet("Client/{clientId}")]
         public async Task<ActionResult<IEnumerable<Order>>> GetOrdersByClientId(int clientId)
         {
@@ -81,15 +78,12 @@ namespace ClickEntrega.Controllers
                 .ToListAsync());
         }
 
-        // POST: api/Orders
         [HttpPost]
         public async Task<ActionResult<Order>> PostOrder(Order order)
         {
-            // Simple logic: calculate total, check stock (simplified)
             order.OrderDate = DateTime.Now;
             order.Status = OrderStatus.Pending;
             
-            // Assuming order items come with ProductId and Quantity
             decimal total = 0;
             int? companyId = null;
 
@@ -103,10 +97,8 @@ namespace ClickEntrega.Controllers
                         return BadRequest($"Estoque insuficiente para o produto {product.Name}. Restam apenas {product.StockQuantity}.");
                     }
 
-                    // Deduct stock
                     product.StockQuantity -= item.Quantity;
 
-                    // Set UnitPrice from current product price if not set
                     if(item.UnitPrice == 0) item.UnitPrice = product.Price;
                     
                     total += item.UnitPrice * item.Quantity;
@@ -114,8 +106,6 @@ namespace ClickEntrega.Controllers
                     if(companyId == null) companyId = product.CompanyId;
                     else if(companyId != product.CompanyId)
                     {
-                         // Basic check: all items should be from same company
-                         // return BadRequest("Pedidos devem conter itens de uma única empresa.");
                     }
                 }
             }
@@ -123,17 +113,15 @@ namespace ClickEntrega.Controllers
             if(order.TotalAmount == 0) order.TotalAmount = total;
             if(order.CompanyId == 0 && companyId.HasValue) order.CompanyId = companyId.Value;
 
-            // Create delivery record if needed
             if(order.Delivery == null)
             {
                  order.Delivery = new Delivery 
                  { 
                      Status = DeliveryStatus.Pending,
-                     Address = "Endereço do Cliente" // Should come from request
+                     Address = "Endereço do Cliente"
                  };
             }
 
-             // Create payment record if needed
             if(order.Payment == null)
             {
                  order.Payment = new Payment 
@@ -148,13 +136,11 @@ namespace ClickEntrega.Controllers
             _context.Order.Add(order);
             await _context.SaveChangesAsync();
 
-            // Publish message to RabbitMQ (or Fake)
             _messageBus.PublishOrderNotification(order.Id, order.ClientId, $"Novo pedido criado: {order.Id} - Valor: {order.TotalAmount}", order.Status.ToString());
 
             return CreatedAtAction("GetOrder", new { id = order.Id }, order);
         }
 
-        // DELETE: api/Orders/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrder(int id)
         {
@@ -170,7 +156,6 @@ namespace ClickEntrega.Controllers
             return NoContent();
         }
 
-        // PUT: api/Orders/5/Status
         [HttpPut("{id}/Status")]
         public async Task<IActionResult> UpdateStatus(int id, [FromBody] ClickEntrega.Models.DTOs.UpdateOrderStatusDto dto)
         {
@@ -194,7 +179,6 @@ namespace ClickEntrega.Controllers
 
             await _context.SaveChangesAsync();
             
-            // Notify client (optional/mock)
             string friendlyStatus = GetFriendlyStatusName(dto.Status);
             _messageBus.PublishOrderNotification(order.Id, order.ClientId, $"Status do pedido: {friendlyStatus}", dto.Status.ToString());
 

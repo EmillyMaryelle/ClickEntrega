@@ -59,7 +59,6 @@ namespace ClickEntrega.Services
                                      autoDelete: false,
                                      arguments: null);
 
-                // Processa uma mensagem por vez
                 _channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
 
                 var consumer = new EventingBasicConsumer(_channel);
@@ -76,14 +75,12 @@ namespace ClickEntrega.Services
                             await ProcessNotification(notification);
                         }
 
-                        // Confirma processamento
                         _channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
                     }
                     catch (Exception ex)
                     {
                         _logger.LogError(ex, "Error processing notification: {Message}", message);
                         
-                        // Rejeita mensagem e não reenvia (pode adicionar dead letter queue depois)
                         _channel.BasicNack(deliveryTag: ea.DeliveryTag, multiple: false, requeue: false);
                     }
                 };
@@ -153,5 +150,3 @@ namespace ClickEntrega.Services
         }
     }
 }
-
-

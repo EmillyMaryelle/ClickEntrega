@@ -21,14 +21,12 @@ namespace ClickEntrega.Controllers
             _context = context;
         }
 
-        // GET: api/Deliveries
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Delivery>>> GetDelivery()
         {
             return await _context.Delivery.Include(d => d.Order).Include(d => d.Courier).ToListAsync();
         }
 
-        // GET: api/Deliveries/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Delivery>> GetDelivery(int id)
         {
@@ -45,7 +43,6 @@ namespace ClickEntrega.Controllers
             return delivery;
         }
 
-        // POST: api/Deliveries
         [HttpPost]
         public async Task<ActionResult<Delivery>> PostDelivery(Delivery delivery)
         {
@@ -55,7 +52,6 @@ namespace ClickEntrega.Controllers
             return CreatedAtAction("GetDelivery", new { id = delivery.Id }, delivery);
         }
 
-        // PUT: api/Deliveries/5/Status
         [HttpPut("{id}/Status")]
         public async Task<IActionResult> UpdateStatus(int id, DeliveryStatus status, string location)
         {
@@ -76,7 +72,6 @@ namespace ClickEntrega.Controllers
             return Ok(delivery);
         }
         
-        // PUT: api/Deliveries/5/AssignCourier
         [HttpPut("{id}/AssignCourier/{courierId}")]
         public async Task<IActionResult> AssignCourier(int id, int courierId)
         {
@@ -87,13 +82,12 @@ namespace ClickEntrega.Controllers
             if (courier == null) return NotFound("Courier not found");
             
             delivery.CourierId = courierId;
-            delivery.Status = DeliveryStatus.Pending; // Or PickedUp?
+            delivery.Status = DeliveryStatus.Pending;
             
             await _context.SaveChangesAsync();
             return Ok(delivery);
         }
 
-        // POST: api/Deliveries/Order/5/Assign/3
         [HttpPost("Order/{orderId}/Assign/{courierId}")]
         public async Task<ActionResult<Delivery>> AssignCourierToOrder(int orderId, int courierId)
         {
@@ -116,22 +110,11 @@ namespace ClickEntrega.Controllers
                     TrackingCode = Guid.NewGuid().ToString().Substring(0, 8).ToUpper()
                 };
                 
-                // Try to get address from Client if available
-                /*
-                var client = await _context.Client.FindAsync(order.ClientId);
-                if(client != null) delivery.Address = client.Address;
-                */
-                // For now, just placeholder or we need to fetch client.
-                // Let's rely on the fact that we can update it later or client should provide it.
-                // Actually, Order doesn't have Address field directly, it's on Client. 
-                // Ideally Order should snapshot the address.
-                
                  _context.Delivery.Add(delivery);
             }
             else
             {
                 delivery.CourierId = courierId;
-                // delivery.Status = DeliveryStatus.Pending; // Keep existing status or reset?
             }
 
             await _context.SaveChangesAsync();
@@ -139,4 +122,3 @@ namespace ClickEntrega.Controllers
         }
     }
 }
-

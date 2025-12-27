@@ -34,7 +34,6 @@ namespace ClickEntrega.Services
                     {
                         var context = scope.ServiceProvider.GetRequiredService<ClickEntregaContext>();
                         
-                        // Check for orders pending for more than 3 minutes
                         var cutoffTime = DateTime.Now.AddMinutes(-3);
                         
                         var staleOrders = await context.Order
@@ -59,10 +58,8 @@ namespace ClickEntrega.Services
                     _logger.LogError(ex, "Error in Order Timeout Service");
                 }
 
-                // Wait for 1 minute before next check
                 await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
             }
         }
     }
 }
-

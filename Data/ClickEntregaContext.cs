@@ -29,8 +29,6 @@ namespace ClickEntrega.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
-            // Mapear tabelas para minusculo para evitar problemas com PostgreSQL (case sensitive)
             modelBuilder.Entity<Client>().ToTable("client");
             modelBuilder.Entity<Product>().ToTable("product");
             modelBuilder.Entity<Category>().ToTable("category");
@@ -43,10 +41,6 @@ namespace ClickEntrega.Data
             modelBuilder.Entity<Notification>().ToTable("notification");
             modelBuilder.Entity<Company>().ToTable("company");
 
-            // MongoDB handles Guids natively, no need for Char(36) mapping
-
-
-            // Fluent API configurations if needed
             modelBuilder.Entity<Category>()
                 .HasOne(c => c.ParentCategory)
                 .WithMany(c => c.SubCategories)
@@ -66,4 +60,3 @@ namespace ClickEntrega.Data
         }
     }
 }
-

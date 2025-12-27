@@ -43,7 +43,6 @@ namespace ClickEntrega.Tests
         [TestMethod]
         public async Task GetProducts_ReturnsOnlyCompanyProducts()
         {
-            // Arrange
             var context = GetDatabaseContext();
             var company1 = 1;
             var company2 = 2;
@@ -58,10 +57,8 @@ namespace ClickEntrega.Tests
 
             var controller = new ProductsController(context);
 
-            // Act
             var result = await controller.GetProduct(companyId: company1);
 
-            // Assert
             var products = GetActionResultValue(result) as IEnumerable<Product>;
             Assert.IsNotNull(products);
             Assert.AreEqual(2, products.Count());
@@ -74,7 +71,6 @@ namespace ClickEntrega.Tests
         [TestMethod]
         public async Task PostOrder_SetsCompanyId_FromProducts()
         {
-            // Arrange
             var context = GetDatabaseContext();
             var companyId = 99;
             var product = new Product { Id = 10, Name = "Pizza", CompanyId = companyId, Price = 50, StockQuantity = 10 };
@@ -93,23 +89,19 @@ namespace ClickEntrega.Tests
                 Payment = new Payment { Method = PaymentMethod.CreditCard }
             };
 
-            // Act
             var result = await controller.PostOrder(order);
 
-            // Assert
             var actionResult = result.Result as CreatedAtActionResult;
             Assert.IsNotNull(actionResult);
             var createdOrder = actionResult.Value as Order;
             Assert.IsNotNull(createdOrder);
             
-            // This is expected to FAIL before the fix
             Assert.AreEqual(companyId, createdOrder.CompanyId);
         }
 
         [TestMethod]
         public async Task GetOrders_ReturnsOnlyCompanyOrders()
         {
-            // Arrange
             var context = GetDatabaseContext();
             var company1 = 10;
             var company2 = 20;
@@ -124,10 +116,8 @@ namespace ClickEntrega.Tests
 
             var controller = new OrdersController(context, new FakeMessageBusService());
 
-            // Act
             var result = await controller.GetOrder(companyId: company1);
 
-            // Assert
             var orders = GetActionResultValue(result) as IEnumerable<Order>;
             Assert.IsNotNull(orders);
             Assert.AreEqual(2, orders.Count());

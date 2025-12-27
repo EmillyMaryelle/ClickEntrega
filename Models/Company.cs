@@ -10,7 +10,7 @@ namespace ClickEntrega.Models
         [Required]
         public string Password { get; set; } = string.Empty;
         [Required]
-        public string Type { get; set; } = string.Empty; // Pizzaria, Hamburgueria, etc.
+        public string Type { get; set; } = string.Empty;
 
         public List<Product> Products { get; set; } = new();
         public List<Category> Categories { get; set; } = new();

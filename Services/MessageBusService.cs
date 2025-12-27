@@ -47,11 +47,9 @@ namespace ClickEntrega.Services
                 _connection = factory.CreateConnection();
                 _channel = _connection.CreateModel();
 
-                // Declara filas
                 _connection = factory.CreateConnection();
                 _channel = _connection.CreateModel();
 
-                // Declara filas
                 _channel.QueueDeclare(queue: NOTIFICATIONS_QUEUE,
                                      durable: true,
                                      exclusive: false,
@@ -69,7 +67,6 @@ namespace ClickEntrega.Services
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Failed to connect to RabbitMQ. Notifications will not be sent. The application will continue to work normally.");
-                // Em caso de erro, não quebra a aplicação
                 _connection = null;
                 _channel = null;
             }
@@ -93,7 +90,7 @@ namespace ClickEntrega.Services
                 var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(notification));
 
                 var properties = _channel.CreateBasicProperties();
-                properties.Persistent = true; // Mensagem persiste mesmo se RabbitMQ reiniciar
+                properties.Persistent = true;
 
                 _channel.BasicPublish(exchange: "",
                                      routingKey: NOTIFICATIONS_QUEUE,
@@ -180,5 +177,3 @@ namespace ClickEntrega.Services
         }
     }
 }
-
-

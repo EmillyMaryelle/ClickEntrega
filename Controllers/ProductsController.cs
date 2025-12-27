@@ -21,7 +21,6 @@ namespace ClickEntrega.Controllers
             _context = context;
         }
 
-        // GET: api/Products
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Product>>> GetProduct([FromQuery] int? companyId)
         {
@@ -38,7 +37,6 @@ namespace ClickEntrega.Controllers
             return Ok(await query.ToListAsync());
         }
 
-        // GET: api/Products/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Product>> GetProduct(int id)
         {
@@ -55,7 +53,6 @@ namespace ClickEntrega.Controllers
             return Ok(product);
         }
 
-        // PUT: api/Products/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutProduct(int id, Product product)
         {
@@ -85,7 +82,6 @@ namespace ClickEntrega.Controllers
             return NoContent();
         }
 
-        // POST: api/Products
         [HttpPost]
         public async Task<ActionResult<Product>> PostProduct(Product product)
         {
@@ -95,7 +91,6 @@ namespace ClickEntrega.Controllers
             return CreatedAtAction("GetProduct", new { id = product.Id }, product);
         }
 
-        // DELETE: api/Products/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {

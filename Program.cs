@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using ClickEntrega.Data;
-using ClickEntrega.Services; // Add namespace
+using ClickEntrega.Services;
 using System.Text.Json.Serialization;
 
 namespace ClickEntrega
@@ -10,7 +10,6 @@ namespace ClickEntrega
     {
         public static void Main(string[] args)
         {
-            // Fix for PostgreSQL timestamp issue
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
             var builder = WebApplication.CreateBuilder(args);
@@ -21,19 +20,11 @@ namespace ClickEntrega
                 options.UseNpgsql(connectionString)
             );
 
-            // Add services to the container.
-            // builder.Services.AddHostedService<OrderTimeoutService>(); // Register background service
-            
-            // RabbitMQ Services
-            // Use FakeMessageBusService when RabbitMQ is not available
             builder.Services.AddSingleton<IMessageBusService, FakeMessageBusService>();
-            // builder.Services.AddSingleton<IMessageBusService, MessageBusService>();
-            // builder.Services.AddHostedService<NotificationConsumerService>();
 
             builder.Services.AddControllers()
                 .AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
             
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
@@ -42,15 +33,12 @@ namespace ClickEntrega
 
             var app = builder.Build();
 
-            // Database initialization
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<ClickEntregaContext>();
-                // db.Database.EnsureDeleted(); // CUIDADO: Isso apaga o banco! Use apenas se quiser recriar do zero
                 db.Database.EnsureCreated();
             }
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -65,7 +53,6 @@ namespace ClickEntrega
 
             app.UseAuthorization();
 
-            // app.MapRazorPages();
             app.MapControllers();
 
             app.MapFallbackToFile("index.html");
@@ -74,4 +61,3 @@ namespace ClickEntrega
         }
     }
 }
-

@@ -23,7 +23,7 @@ namespace ClickEntrega.Models
         public int CompanyId { get; set; }
         public Company? Company { get; set; }
         
-        public Review? Review { get; set; } // One-to-One (optional)
+        public Review? Review { get; set; }
     }
 
     public enum OrderStatus

@@ -42,7 +42,6 @@ namespace ClickEntrega.Controllers
             return CreatedAtAction("GetCategories", new { id = category.Id }, category);
         }
 
-        // PUT: api/Categories/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCategory(int id, Category category)
         {
@@ -72,7 +71,6 @@ namespace ClickEntrega.Controllers
             return NoContent();
         }
 
-        // DELETE: api/Categories/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategory(int id)
         {

@@ -27,7 +27,6 @@ namespace ClickEntrega.Controllers
             _context = context;
         }
 
-        // GET: api/Companies
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Company>>> GetCompany()
         {
@@ -47,7 +46,6 @@ namespace ClickEntrega.Controllers
             return Ok(company);
         }
 
-        // POST: api/Companies
         [HttpPost]
         public async Task<ActionResult<Company>> PostCompany(Company company)
         {
@@ -62,7 +60,6 @@ namespace ClickEntrega.Controllers
             return CreatedAtAction("GetCompany", new { id = company.Id }, company);
         }
 
-        // POST: api/Companies/Login
         [HttpPost("Login")]
         public async Task<ActionResult<Company>> Login([FromBody] LoginRequest login)
         {
@@ -77,7 +74,6 @@ namespace ClickEntrega.Controllers
             return Ok(company);
         }
 
-        // DELETE: api/Companies/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCompany(int id)
         {

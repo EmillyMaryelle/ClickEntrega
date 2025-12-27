@@ -44,7 +44,7 @@ header .container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap; /* Allow wrapping */
+    flex-wrap: wrap; 
 }
 
 @media (max-width: 768px) {
@@ -105,12 +105,12 @@ main {
     padding: 20px 0;
 }
 
-/* Menu Style */
+
 .menu-section {
     margin-bottom: 40px;
 }
 
-/* Product Grid (Restored) */
+
 .product-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -197,7 +197,7 @@ main {
     background-color: var(--color-2);
 }
 
-/* Cart */
+
 .cart-items {
     margin-bottom: 20px;
 }
@@ -209,7 +209,7 @@ main {
     padding: 10px;
     background: white;
     border-bottom: 1px solid #eee;
-    flex-wrap: wrap; /* Allow wrapping */
+    flex-wrap: wrap; 
     gap: 10px;
 }
 
@@ -220,8 +220,8 @@ main {
     }
 
     .cart-item > * {
-        width: 100%; /* Full width for children on mobile */
-        justify-content: space-between; /* If children are flex containers */
+        width: 100%; 
+        justify-content: space-between; 
     }
 }
 
@@ -238,7 +238,7 @@ main {
     padding-top: 20px;
 }
 
-/* Forms */
+
 .form-group {
     margin-bottom: 15px;
 }
@@ -310,14 +310,14 @@ main {
     border: none;
     cursor: pointer;
     color: white;
-    background-color: var(--secondary); /* Default for sm if not overridden */
+    background-color: var(--secondary); 
 }
 
 .btn-sm:hover, .btn-primary:hover, .btn-secondary:hover, .btn-info:hover, .btn-success:hover {
     opacity: 0.9;
 }
 
-/* Login Selection */
+
 .login-selection-container {
     text-align: center;
     padding: 50px 0;
@@ -358,7 +358,7 @@ main {
     padding: 30px;
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    width: 90%; /* Ensure it doesn't overflow screen width */
+    width: 90%; 
 }
 
 @media (max-width: 480px) {
@@ -368,7 +368,7 @@ main {
     }
 }
 
-/* Category Filter */
+
 .category-filter {
     display: flex;
     justify-content: center;
@@ -400,7 +400,7 @@ main {
     border-color: var(--secondary);
 }
 
-/* Menu Grid Styles */
+
 .menu-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -496,7 +496,7 @@ main {
     font-size: 0.9rem;
 }
 
-/* Order Status Colors */
+
 .status-badge {
     padding: 4px 8px;
     border-radius: 4px;
@@ -505,7 +505,7 @@ main {
     display: inline-block;
 }
 
-/* Modal */
+
 .modal {
     position: fixed;
     top: 0;
@@ -528,7 +528,7 @@ main {
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
-/* Tables */
+
 table {
     width: 100%;
     border-collapse: collapse;
@@ -546,19 +546,19 @@ th {
     font-weight: bold;
 }
 
-/* Admin Tabs */
+
 .admin-tabs {
     display: flex;
     gap: 10px;
     margin-top: 20px;
     border-bottom: 1px solid #ddd;
     padding-bottom: 0;
-    overflow-x: auto; /* Scroll on small screens */
+    overflow-x: auto; 
     white-space: nowrap;
-    -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
+    -webkit-overflow-scrolling: touch; 
 }
 
-/* Table Responsive */
+
 .table-container {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -585,7 +585,7 @@ th {
     padding-top: 20px;
 }
 
-/* Order List Grid - Painel da Empresa */
+
 #admin-orders-list.order-list {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -689,7 +689,7 @@ th {
     margin: 0;
 }
 
-/* Responsividade - ajustar para telas menores */
+
 @media (max-width: 1400px) {
     #admin-orders-list.order-list {
         grid-template-columns: repeat(4, 1fr);
@@ -718,7 +718,7 @@ th {
    MODAIS DE ALERTA, NOTIFICAÇÃO E EVENTO
    ============================================ */
 
-/* Modal Base */
+
 .alert-modal {
     position: fixed;
     top: 0;
@@ -842,7 +842,7 @@ th {
     opacity: 1;
 }
 
-/* Modal de Sucesso */
+
 .alert-modal-success .alert-modal-header {
     border-bottom-color: #5e9fa3;
 }
@@ -860,7 +860,7 @@ th {
     color: #5e9fa3;
 }
 
-/* Modal de Erro */
+
 .alert-modal-error .alert-modal-header {
     border-bottom-color: #910f43;
 }
@@ -878,7 +878,7 @@ th {
     color: #910f43;
 }
 
-/* Modal de Notificação */
+
 .alert-modal-notification .alert-modal-header {
     border-bottom-color: #000000;
 }
@@ -896,7 +896,7 @@ th {
     color: #000000;
 }
 
-/* Modal de Evento */
+
 .alert-modal-event {
     background: rgba(0, 0, 0, 0.7);
 }
@@ -927,14 +927,14 @@ th {
    VALIDAÇÃO DE CAMPOS OBRIGATÓRIOS
    ============================================ */
 
-/* Asterisco para campos obrigatórios */
+
 .form-group label.required::after {
     content: " *";
     color: #910f43;
     font-weight: bold;
 }
 
-/* Campo obrigatório não preenchido */
+
 .form-group input.required:invalid,
 .form-group textarea.required:invalid,
 .form-group select.required:invalid,
@@ -953,7 +953,7 @@ th {
     75% { transform: translateX(5px); }
 }
 
-/* Remove blur quando campo é válido */
+
 .form-group input.required:valid:not(:placeholder-shown),
 .form-group textarea.required:valid:not(:placeholder-shown),
 .form-group select.required:valid:not([value=""]) {
@@ -962,7 +962,7 @@ th {
     filter: none !important;
 }
 
-/* Mensagem de erro abaixo do campo */
+
 .form-group .field-error {
     color: #b3544f;
     font-size: 0.85rem;
@@ -976,7 +976,7 @@ th {
 
 .nav-btn-link { text-decoration: none; color: inherit; display: inline-block; }
 
-/* Toast Notification */
+
 .toast {
     background: white;
     padding: 15px 20px;

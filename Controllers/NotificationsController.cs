@@ -24,7 +24,6 @@ namespace ClickEntrega.Controllers
             _messageBus = messageBus;
         }
 
-        // GET: api/Notifications/Client/5
         [HttpGet("Client/{clientId}")]
         public async Task<ActionResult<IEnumerable<Notification>>> GetClientNotifications(int clientId)
         {
@@ -42,12 +41,9 @@ namespace ClickEntrega.Controllers
             }
         }
 
-        // POST: api/Notifications
         [HttpPost]
         public async Task<ActionResult<Notification>> PostNotification(Notification notification)
         {
-            // Se a notificação já tem ID, significa que foi criada diretamente no banco
-            // Caso contrário, publica via RabbitMQ para processamento assíncrono
             if (notification.Id == 0)
             {
                 _messageBus.PublishOrderNotification(
@@ -56,7 +52,6 @@ namespace ClickEntrega.Controllers
                     notification.Message
                 );
                 
-                // Retorna sucesso, mas a notificação será processada pelo consumer
                 return Ok(new { message = "Notificação enviada para processamento" });
             }
             else
@@ -67,7 +62,6 @@ namespace ClickEntrega.Controllers
             }
         }
 
-        // PUT: api/Notifications/5/Read
         [HttpPut("{id}/Read")]
         public async Task<IActionResult> MarkAsRead(int id)
         {
@@ -84,4 +78,3 @@ namespace ClickEntrega.Controllers
         }
     }
 }
-

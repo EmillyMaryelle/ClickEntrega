@@ -27,14 +27,12 @@ namespace ClickEntrega.Controllers
             _context = context;
         }
 
-        // GET: api/Clients
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Client>>> GetClient()
         {
             return await _context.Client.ToListAsync();
         }
 
-        // GET: api/Clients/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Client>> GetClient(int id)
         {
@@ -48,7 +46,6 @@ namespace ClickEntrega.Controllers
             return client;
         }
 
-        // PUT: api/Clients/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutClient(int id, Client client)
         {
@@ -78,7 +75,6 @@ namespace ClickEntrega.Controllers
             return NoContent();
         }
 
-        // POST: api/Clients
         [HttpPost]
         public async Task<ActionResult<Client>> PostClient(Client client)
         {
@@ -98,7 +94,6 @@ namespace ClickEntrega.Controllers
             return CreatedAtAction("GetClient", new { id = client.Id }, client);
         }
 
-        // POST: api/Clients/Login
         [HttpPost("Login")]
         public async Task<ActionResult<Client>> Login([FromBody] LoginRequest login)
         {
@@ -113,7 +108,6 @@ namespace ClickEntrega.Controllers
             return Ok(client);
         }
 
-        // DELETE: api/Clients/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteClient(int id)
         {
