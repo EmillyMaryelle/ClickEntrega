@@ -30,7 +30,7 @@ namespace ClickEntrega.Controllers
 
         // GET: api/Deliveries/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Delivery>> GetDelivery(Guid id)
+        public async Task<ActionResult<Delivery>> GetDelivery(int id)
         {
             var delivery = await _context.Delivery
                 .Include(d => d.Order)
@@ -78,7 +78,7 @@ namespace ClickEntrega.Controllers
         
         // PUT: api/Deliveries/5/AssignCourier
         [HttpPut("{id}/AssignCourier/{courierId}")]
-        public async Task<IActionResult> AssignCourier(Guid id, Guid courierId)
+        public async Task<IActionResult> AssignCourier(int id, int courierId)
         {
             var delivery = await _context.Delivery.FindAsync(id);
             if (delivery == null) return NotFound("Delivery not found");
@@ -95,7 +95,7 @@ namespace ClickEntrega.Controllers
 
         // POST: api/Deliveries/Order/5/Assign/3
         [HttpPost("Order/{orderId}/Assign/{courierId}")]
-        public async Task<ActionResult<Delivery>> AssignCourierToOrder(Guid orderId, Guid courierId)
+        public async Task<ActionResult<Delivery>> AssignCourierToOrder(int orderId, int courierId)
         {
             var order = await _context.Order.FindAsync(orderId);
             if (order == null) return NotFound("Order not found");

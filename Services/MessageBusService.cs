@@ -7,8 +7,9 @@ namespace ClickEntrega.Services
 {
     public interface IMessageBusService
     {
-        void PublishOrderNotification(Guid orderId, Guid clientId, string message, string? orderStatus = null);
-        void PublishOrderStatusChange(Guid orderId, Guid clientId, string status, DateTime? estimatedDeliveryTime = null);
+        void PublishOrderNotification(int orderId, int clientId, string message, string? orderStatus = null);
+        void PublishOrderStatusChange(int orderId, int clientId, string status, DateTime? estimatedDeliveryTime = null);
+        void Publish(string queue, string message);
     }
 
     public class MessageBusService : IMessageBusService, IDisposable
@@ -74,7 +75,7 @@ namespace ClickEntrega.Services
             }
         }
 
-        public void PublishOrderNotification(Guid orderId, Guid clientId, string message, string? orderStatus = null)
+        public void PublishOrderNotification(int orderId, int clientId, string message, string? orderStatus = null)
         {
             try
             {
@@ -107,7 +108,7 @@ namespace ClickEntrega.Services
             }
         }
 
-        public void PublishOrderStatusChange(Guid orderId, Guid clientId, string status, DateTime? estimatedDeliveryTime = null)
+        public void PublishOrderStatusChange(int orderId, int clientId, string status, DateTime? estimatedDeliveryTime = null)
         {
             try
             {
@@ -137,6 +138,36 @@ namespace ClickEntrega.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error publishing order status change for Order {OrderId}", orderId);
+            }
+        }
+
+        public void Publish(string queue, string message)
+        {
+            try
+            {
+                if (_channel == null || !_channel.IsOpen) return;
+
+                var body = Encoding.UTF8.GetBytes(message);
+
+                var properties = _channel.CreateBasicProperties();
+                properties.Persistent = true;
+
+                _channel.QueueDeclare(queue: queue,
+                                     durable: true,
+                                     exclusive: false,
+                                     autoDelete: false,
+                                     arguments: null);
+
+                _channel.BasicPublish(exchange: "",
+                                     routingKey: queue,
+                                     basicProperties: properties,
+                                     body: body);
+
+                _logger.LogInformation("Message published to {Queue}", queue);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error publishing message to {Queue}", queue);
             }
         }
 

@@ -4,7 +4,7 @@ namespace ClickEntrega.Models
 {
     public class Client
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         [Required]
         public string Name { get; set; } = string.Empty;
         [Required]
@@ -20,4 +20,3 @@ namespace ClickEntrega.Models
         public List<Review> Reviews { get; set; } = new();
     }
 }
-

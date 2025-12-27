@@ -1,18 +1,7 @@
-html {
-  font-size: 14px;
-}
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
-body {
-  margin-bottom: 60px;
+/* Navigation Links wrapping buttons */
+.nav-btn-link {
+    text-decoration: none;
+    color: inherit;
+    display: inline-block;
 }

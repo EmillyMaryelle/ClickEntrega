@@ -44,5 +44,16 @@ Utilize as credenciais abaixo para testar as funcionalidades do sistema:
 
 ## ⚙️ Configuração Local
 
+1.  **Pré-requisitos**:
+    *   .NET 8 SDK instalado.
+    *   (Opcional) RabbitMQ para funcionalidades avançadas de mensageria.
+
+2.  **Como Executar**:
+    ```bash
+    dotnet restore
+    dotnet run
+    ```
+    Acesse a aplicação em `http://localhost:5171` (ou a porta indicada no terminal).
+
 O projeto está configurado para conectar-se automaticamente ao banco de dados na nuvem (Supabase).
 Caso o RabbitMQ não esteja instalado localmente, o sistema utilizará automaticamente um serviço simulado (`FakeMessageBusService`) para garantir que a aplicação rode sem erros.

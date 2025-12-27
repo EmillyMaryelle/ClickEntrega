@@ -36,7 +36,7 @@ namespace ClickEntrega.Controllers
 
         // GET: api/Clients/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Client>> GetClient(Guid id)
+        public async Task<ActionResult<Client>> GetClient(int id)
         {
             var client = await _context.Client.FindAsync(id);
 
@@ -50,7 +50,7 @@ namespace ClickEntrega.Controllers
 
         // PUT: api/Clients/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutClient(Guid id, Client client)
+        public async Task<IActionResult> PutClient(int id, Client client)
         {
             if (id != client.Id)
             {
@@ -98,6 +98,7 @@ namespace ClickEntrega.Controllers
             return CreatedAtAction("GetClient", new { id = client.Id }, client);
         }
 
+        // POST: api/Clients/Login
         [HttpPost("Login")]
         public async Task<ActionResult<Client>> Login([FromBody] LoginRequest login)
         {
@@ -109,12 +110,12 @@ namespace ClickEntrega.Controllers
                 return Unauthorized("Email ou senha inválidos.");
             }
 
-            return client;
+            return Ok(client);
         }
 
         // DELETE: api/Clients/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteClient(Guid id)
+        public async Task<IActionResult> DeleteClient(int id)
         {
             var client = await _context.Client.FindAsync(id);
             if (client == null)
@@ -128,23 +129,9 @@ namespace ClickEntrega.Controllers
             return NoContent();
         }
 
-        // GET: api/Clients/5/Orders
-        [HttpGet("{id}/Orders")]
-        public async Task<ActionResult<IEnumerable<Order>>> GetClientOrders(Guid id)
-        {
-             var orders = await _context.Order
-                .Where(o => o.ClientId == id)
-                .Include(o => o.Items)
-                .Include(o => o.Delivery)
-                .Include(o => o.Payment)
-                .ToListAsync();
-            return orders;
-        }
-
-        private bool ClientExists(Guid id)
+        private bool ClientExists(int id)
         {
             return _context.Client.Any(e => e.Id == id);
         }
     }
 }
-
