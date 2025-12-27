@@ -4,7 +4,7 @@ namespace ClickEntrega.Models
 {
     public class Company
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         [Required]
         public string Name { get; set; } = string.Empty;
         [Required]
@@ -18,4 +18,3 @@ namespace ClickEntrega.Models
         public List<Courier> Couriers { get; set; } = new();
     }
 }
-

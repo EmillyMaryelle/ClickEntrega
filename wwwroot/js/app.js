@@ -7,6 +7,7 @@ const app = {
         products: [],
         notifications: []
     },
+    lastNotificationId: 0,
     
     init: function() {
         this.cart = JSON.parse(sessionStorage.getItem('cart')) || [];
@@ -158,9 +159,30 @@ const app = {
         }
     },
 
+    toggleOtherTypeField: function() {
+        const select = document.getElementById('new-company-type');
+        const otherContainer = document.getElementById('other-type-container');
+        const manualInput = document.getElementById('new-company-type-manual');
+        
+        if (select && otherContainer) {
+            if (select.value === 'Outro') {
+                otherContainer.style.display = 'block';
+                manualInput.classList.add('required');
+            } else {
+                otherContainer.style.display = 'none';
+                manualInput.classList.remove('required');
+                manualInput.value = ''; 
+                manualInput.classList.remove('error');
+                const errorMsg = manualInput.parentElement?.querySelector('.field-error');
+                if (errorMsg) errorMsg.classList.remove('show');
+            }
+        }
+    },
+
     registerCompany: async function() {
         const nameField = document.getElementById('new-company-name');
         const typeField = document.getElementById('new-company-type');
+        const manualTypeField = document.getElementById('new-company-type-manual');
         const passwordField = document.getElementById('new-company-password');
         
         if (!nameField || !typeField || !passwordField) {
@@ -169,9 +191,21 @@ const app = {
         }
         
         const name = nameField.value ? nameField.value.trim() : '';
-        const type = typeField.value ? typeField.value.trim() : '';
+        let type = typeField.value ? typeField.value.trim() : '';
         const password = passwordField.value ? passwordField.value.trim() : '';
         
+        // Handle 'Outro' type
+        if (type === 'Outro' && manualTypeField) {
+            const manualType = manualTypeField.value ? manualTypeField.value.trim() : '';
+            if (manualType) {
+                type = manualType;
+            } else {
+                // If manual type is empty, we will catch it in validation below if we handle it
+                // Ideally, we treat 'Outro' as invalid if manual is empty
+                type = ''; // Reset type to force validation error if manual is empty
+            }
+        }
+
         // Validação de campos obrigatórios
         let hasError = false;
         if (!name) {
@@ -185,15 +219,29 @@ const app = {
             if (errorMsg) errorMsg.classList.remove('show');
         }
         
-        if (!type) {
+        if (!type && typeField.value !== 'Outro') {
             typeField.classList.add('error');
             const errorMsg = typeField.parentElement?.querySelector('.field-error');
             if (errorMsg) errorMsg.classList.add('show');
             hasError = true;
+        } else if (typeField.value === 'Outro' && !type) {
+             // Manual field is empty
+             if(manualTypeField) {
+                manualTypeField.classList.add('error');
+                const errorMsg = manualTypeField.parentElement?.querySelector('.field-error');
+                if (errorMsg) errorMsg.classList.add('show');
+                hasError = true;
+             }
         } else {
             typeField.classList.remove('error');
             const errorMsg = typeField.parentElement?.querySelector('.field-error');
             if (errorMsg) errorMsg.classList.remove('show');
+
+            if(manualTypeField) {
+                manualTypeField.classList.remove('error');
+                const errorMsg = manualTypeField.parentElement?.querySelector('.field-error');
+                if (errorMsg) errorMsg.classList.remove('show');
+            }
         }
         
         if (!password) {
@@ -305,6 +353,8 @@ const app = {
     logout: function() {
         this.currentUser = null;
         this.userRole = null;
+        this.lastNotificationId = 0;
+        this.data.notifications = [];
         sessionStorage.removeItem('currentUser');
         sessionStorage.removeItem('userRole');
         this.showLoginSelection();
@@ -464,7 +514,7 @@ const app = {
             filterDiv.innerHTML = `
                 <button onclick="app.renderMenu()" class="${!filterCategoryId ? 'active' : ''}">Todos</button>
                 ${this.data.categories.map(c => `
-                    <button onclick="app.renderMenu(${c.id})" class="${filterCategoryId === c.id ? 'active' : ''}">${c.name}</button>
+                    <button onclick="app.renderMenu(${c.id})" class="${filterCategoryId == c.id ? 'active' : ''}">${c.name}</button>
                 `).join('')}
             `;
             container.appendChild(filterDiv);
@@ -472,6 +522,8 @@ const app = {
             // Filter Products
             let productsToShow = this.data.products;
             if(filterCategoryId) {
+                // Ensure ID is a number
+                filterCategoryId = Number(filterCategoryId);
                 productsToShow = productsToShow.filter(p => p.categoryId === filterCategoryId);
             }
 
@@ -525,10 +577,12 @@ const app = {
     },
 
     addToCart: function(productId) {
-        const product = this.data.products.find(p => p.id === productId);
+        // Ensure ID is a number
+        const id = Number(productId);
+        const product = this.data.products.find(p => p.id === id);
         if(!product) return;
 
-        const existing = this.cart.find(i => i.productId === productId);
+        const existing = this.cart.find(i => i.productId === id);
         if(existing) {
             if(existing.quantity >= product.stockQuantity) {
                 this.showAlertModal('error', 'Erro', 'Estoque insuficiente para adicionar mais.');
@@ -667,7 +721,7 @@ const app = {
 
                         <div class="form-group">
                             <label>ID do Cliente:</label>
-                            <input type="number" id="checkout-client-id-${companyId}" placeholder="Ex: 1" value="${this.currentUser ? this.currentUser.id : ''}" ${this.currentUser ? 'readonly' : ''}>
+                            <input type="text" id="checkout-client-id-${companyId}" placeholder="Ex: 1" value="${this.currentUser ? this.currentUser.id : ''}" ${this.currentUser ? 'readonly' : ''}>
                         </div>
                         <div class="form-group">
                             <label>Endereço de Entrega:</label>
@@ -686,7 +740,7 @@ const app = {
                                 <option value="3">Dinheiro (Entrega)</option>
                             </select>
                         </div>
-                        <button onclick="app.checkout(${companyId})" class="btn-primary" style="width: 100%;">Enviar Pedido para ${group.name}</button>
+                        <button onclick="app.checkout('${companyId}')" class="btn-primary" style="width: 100%;">Enviar Pedido para ${group.name}</button>
                     </div>
                 `;
                 contentDiv.appendChild(summaryDiv);
@@ -771,7 +825,7 @@ const app = {
         const totalAmount = itemsToOrder.reduce((sum, i) => sum + (i.price * i.quantity), 0);
 
         const order = {
-            clientId: parseInt(clientId),
+            clientId: clientId,
             companyId: companyId,
             status: 0, // Pending
             totalAmount: totalAmount,
@@ -1004,7 +1058,12 @@ const app = {
             const orders = await response.json();
             
             if(orders.length === 0) {
-                container.innerHTML = '<p>Você ainda não fez nenhum pedido.</p>';
+                container.innerHTML = `
+                    <p>Você ainda não fez nenhum pedido.</p>
+                    <button onclick="app.showCompanyTypes()" class="btn-primary" style="margin-top: 15px;">
+                        <i class="fas fa-utensils"></i> Fazer meu primeiro pedido
+                    </button>
+                `;
                 return;
             }
 
@@ -1039,7 +1098,7 @@ const app = {
                             </div>
                          `;
                     } else {
-                        actions = `<button onclick="app.openReviewModal(${o.id})" class="btn-sm btn-info" style="margin-top:10px; background: var(--color-3); color: white; border:none; padding:5px 10px; border-radius:4px;">Avaliar Pedido</button>`;
+                        actions = `<button onclick="app.openReviewModal('${o.id}')" class="btn-sm btn-info" style="margin-top:10px; background: var(--color-3); color: white; border:none; padding:5px 10px; border-radius:4px;">Avaliar Pedido</button>`;
                     }
                 }
 
@@ -1082,10 +1141,48 @@ const app = {
                 badge.textContent = unread;
                 badge.style.display = unread > 0 ? 'inline-block' : 'none';
             }
+            
+            // Toast Notification Logic
+            const maxId = notifs.length > 0 ? Math.max(...notifs.map(n => n.id)) : 0;
+            
+            if (this.lastNotificationId === 0) {
+                this.lastNotificationId = maxId;
+            } else {
+                const newNotifications = notifs.filter(n => n.id > this.lastNotificationId && !n.isRead);
+                newNotifications.forEach(n => {
+                    this.showToastNotification('Nova Atualização', n.message);
+                });
+                this.lastNotificationId = maxId;
+            }
+
             this.data.notifications = notifs;
         } catch(e) {
             console.error('Error checking notifications', e);
         }
+    },
+
+    showToastNotification: function(title, message) {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `
+            <div class="toast-content">
+                <div class="toast-title" style="font-weight: bold; margin-bottom: 5px; color: var(--primary);">${title}</div>
+                <div class="toast-message" style="font-size: 0.9em; color: #333;">${message}</div>
+            </div>
+            <button onclick="this.parentElement.remove()" style="background: none; border: none; font-size: 1.2em; color: #999; cursor: pointer;">&times;</button>
+        `;
+
+        container.appendChild(toast);
+
+        // Remove automatically after 5s (animation handles fade out)
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.remove();
+            }
+        }, 5000);
     },
 
     showNotifications: function() {
@@ -1155,6 +1252,49 @@ const app = {
         if(tabName === 'products') this.loadAdminProducts();
         if(tabName === 'categories') this.loadAdminCategories();
         if(tabName === 'couriers') this.loadCouriers();
+        if(tabName === 'reviews') this.loadAdminReviews();
+    },
+
+    loadAdminReviews: async function() {
+        const container = document.getElementById('admin-review-list');
+        if(!container) return;
+        container.innerHTML = '<p>Carregando...</p>';
+
+        try {
+            const response = await fetch(`/api/Reviews?companyId=${this.currentUser.id}`);
+            const reviews = await response.json();
+
+            if(reviews.length === 0) {
+                container.innerHTML = '<p>Nenhuma avaliação recebida.</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+            reviews.forEach(r => {
+                const div = document.createElement('div');
+                div.className = 'order-card'; 
+                
+                const stars = '⭐'.repeat(r.rating);
+                const date = new Date(r.date).toLocaleString('pt-BR');
+                
+                div.innerHTML = `
+                    <div class="order-header">
+                        <span>Pedido #${r.orderId || '?'}</span>
+                        <span style="color: #f39c12; font-size: 1.2em;">${stars}</span>
+                    </div>
+                    <div style="font-size: 0.85em; color: #777; margin-bottom: 10px;">
+                        Data: ${date} - Cliente: ${r.client ? r.client.name : 'Anônimo'}
+                    </div>
+                    <div style="background: #fff8e1; padding: 10px; border-radius: 5px; border: 1px solid #ffe082;">
+                        "${r.comment || ''}"
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        } catch(e) {
+            console.error(e);
+            container.innerHTML = '<p>Erro ao carregar avaliações.</p>';
+        }
     },
 
     loadAdminOrders: async function() {
@@ -1185,25 +1325,25 @@ const app = {
                 // Status Transitions
                 if(o.status === 0) { // Pending
                     actions = `
-                        <button onclick="app.acceptOrder(${o.id})" class="btn-success">Aceitar</button>
-                        <button onclick="app.rejectOrder(${o.id})" class="btn-secondary" style="background: var(--color-5); color:white;">Rejeitar</button>
+                        <button onclick="app.acceptOrder('${o.id}')" class="btn-success">Aceitar</button>
+                        <button onclick="app.rejectOrder('${o.id}')" class="btn-secondary" style="background: var(--color-5); color:white;">Rejeitar</button>
                     `;
                 } else if(o.status === 1) { // Confirmed
-                    actions = `<button onclick="app.updateOrderStatus(${o.id}, 2)" class="btn-primary">Iniciar Preparo</button>`;
+                    actions = `<button onclick="app.updateOrderStatus('${o.id}', 2)" class="btn-primary">Iniciar Preparo</button>`;
                 } else if(o.status === 2) { // Preparation
-                    actions = `<button onclick="app.updateOrderStatus(${o.id}, 4)" class="btn-primary">Saiu para Entrega</button>`;
+                    actions = `<button onclick="app.updateOrderStatus('${o.id}', 4)" class="btn-primary">Saiu para Entrega</button>`;
                 } else if(o.status === 4) { // Out for Delivery
-                    actions = `<button onclick="app.updateOrderStatus(${o.id}, 5)" class="btn-primary" style="background:var(--color-3);">Confirmar Entrega</button>`;
+                    actions = `<button onclick="app.updateOrderStatus('${o.id}', 5)" class="btn-primary" style="background:var(--color-3);">Confirmar Entrega</button>`;
                 }
 
                 // Problem Report Button (available for active orders)
                 if(o.status !== 5 && o.status !== 6) {
-                    actions += `<button onclick="app.reportOrderIssue(${o.id}, ${o.clientId})" class="btn-sm" style="margin-left: 10px; background: var(--color-1); color: white;">Notificar Problema</button>`;
+                    actions += `<button onclick="app.reportOrderIssue('${o.id}', '${o.clientId}')" class="btn-sm" style="margin-left: 10px; background: var(--color-1); color: white;">Notificar Problema</button>`;
                 }
 
                 // Assign Courier Button (for confirmed/prep/ready/out)
                 if(o.status >= 1 && o.status < 5) {
-                    actions += `<button onclick="app.showAssignCourierModal(${o.id})" class="btn-sm" style="margin-left: 10px; background: var(--color-4); color: white;">Entregador</button>`;
+                    actions += `<button onclick="app.showAssignCourierModal('${o.id}')" class="btn-sm" style="margin-left: 10px; background: var(--color-4); color: white;">Entregador</button>`;
                 }
 
                 const orderDate = new Date(o.orderDate).toLocaleString('pt-BR', {
@@ -1322,7 +1462,7 @@ const app = {
                                 <td style="padding: 10px;">${p.stockQuantity}</td>
                                 <td style="padding: 10px;">${p.category ? p.category.name : 'N/A'}</td>
                                 <td style="padding: 10px;">
-                                    <button onclick="app.deleteProduct(${p.id})" class="btn-sm" style="background:#e74c3c;">Excluir</button>
+                                    <button onclick="app.deleteProduct('${p.id}')" class="btn-sm" style="background:#e74c3c;">Excluir</button>
                                 </td>
                             </tr>
                         `).join('')}
@@ -1364,7 +1504,7 @@ const app = {
                                 <td style="padding: 10px;">${c.id}</td>
                                 <td style="padding: 10px;">${c.name}</td>
                                 <td style="padding: 10px;">
-                                    <button onclick="app.deleteCategory(${c.id})" class="btn-sm" style="background:var(--color-1); color: white; border:none; padding:5px 10px; border-radius:4px;">Excluir</button>
+                                    <button onclick="app.deleteCategory('${c.id}')" class="btn-sm" style="background:var(--color-1); color: white; border:none; padding:5px 10px; border-radius:4px;">Excluir</button>
                                 </td>
                             </tr>
                         `).join('')}
@@ -1410,8 +1550,8 @@ const app = {
                                 <td style="padding: 10px;">${c.vehicleInfo || '-'}</td>
                                 <td style="padding: 10px;">${c.phone || '-'}</td>
                                 <td style="padding: 10px;">
-                                    <button onclick="app.showCourierRegistration(${c.id})" class="btn-sm" style="background:var(--color-4); color: white; border:none; padding:5px 10px; border-radius:4px;">Editar</button>
-                                    <button onclick="app.deleteCourier(${c.id})" class="btn-sm" style="background:var(--color-1); color: white; border:none; padding:5px 10px; border-radius:4px;">Excluir</button>
+                                    <button onclick="app.showCourierRegistration('${c.id}')" class="btn-sm" style="background:var(--color-4); color: white; border:none; padding:5px 10px; border-radius:4px;">Editar</button>
+                                    <button onclick="app.deleteCourier('${c.id}')" class="btn-sm" style="background:var(--color-1); color: white; border:none; padding:5px 10px; border-radius:4px;">Excluir</button>
                                 </td>
                             </tr>
                         `).join('')}
@@ -1670,7 +1810,7 @@ const app = {
         
         const name = nameField.value ? nameField.value.trim() : '';
         const price = parseFloat(priceField.value);
-        const categoryId = parseInt(categoryField.value);
+        const categoryId = categoryField.value;
         
         // Validação de campos obrigatórios
         let hasError = false;
@@ -1696,7 +1836,7 @@ const app = {
             if (errorMsg) errorMsg.classList.remove('show');
         }
         
-        if (!categoryId || isNaN(categoryId)) {
+        if (!categoryId) {
             categoryField.classList.add('error');
             const errorMsg = categoryField.parentElement?.querySelector('.field-error');
             if (errorMsg) errorMsg.classList.add('show');

@@ -4,8 +4,8 @@ namespace ClickEntrega.Models
 {
     public class Order
     {
-        public Guid Id { get; set; }
-        public DateTime OrderDate { get; set; } = DateTime.Now;
+        public int Id { get; set; }
+        public DateTime OrderDate { get; set; } = DateTime.UtcNow;
         public OrderStatus Status { get; set; }
         public decimal TotalAmount { get; set; }
         
@@ -13,14 +13,14 @@ namespace ClickEntrega.Models
         public string? Observations { get; set; }
         public DateTime? EstimatedDeliveryTime { get; set; }
 
-        public Guid ClientId { get; set; }
+        public int ClientId { get; set; }
         public Client? Client { get; set; }
         
         public List<OrderItem> Items { get; set; } = new();
         public Payment? Payment { get; set; }
         public Delivery? Delivery { get; set; }
 
-        public Guid CompanyId { get; set; }
+        public int CompanyId { get; set; }
         public Company? Company { get; set; }
         
         public Review? Review { get; set; } // One-to-One (optional)
@@ -38,4 +38,3 @@ namespace ClickEntrega.Models
         Problem
     }
 }
-

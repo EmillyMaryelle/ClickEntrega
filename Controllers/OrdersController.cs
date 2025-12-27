@@ -26,7 +26,7 @@ namespace ClickEntrega.Controllers
 
         // GET: api/Orders
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Order>>> GetOrder([FromQuery] Guid? companyId)
+        public async Task<ActionResult<IEnumerable<Order>>> GetOrder([FromQuery] int? companyId)
         {
             var query = _context.Order
                 .Include(o => o.Client)
@@ -46,7 +46,7 @@ namespace ClickEntrega.Controllers
 
         // GET: api/Orders/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Order>> GetOrder(Guid id)
+        public async Task<ActionResult<Order>> GetOrder(int id)
         {
             var order = await _context.Order
                 .Include(o => o.Client)
@@ -67,7 +67,7 @@ namespace ClickEntrega.Controllers
 
         // GET: api/Orders/Client/5
         [HttpGet("Client/{clientId}")]
-        public async Task<ActionResult<IEnumerable<Order>>> GetOrdersByClientId(Guid clientId)
+        public async Task<ActionResult<IEnumerable<Order>>> GetOrdersByClientId(int clientId)
         {
             return Ok(await _context.Order
                 .Where(o => o.ClientId == clientId)
@@ -91,141 +91,135 @@ namespace ClickEntrega.Controllers
             
             // Assuming order items come with ProductId and Quantity
             decimal total = 0;
-            Guid? companyId = null;
+            int? companyId = null;
 
             foreach(var item in order.Items)
             {
                 var product = await _context.Product.FindAsync(item.ProductId);
                 if(product != null)
                 {
-                    if (companyId == null)
-                    {
-                        companyId = product.CompanyId;
-                    }
-                    else if (companyId != product.CompanyId)
-                    {
-                         return BadRequest("Cannot mix products from different companies in one order.");
-                    }
-
-                    if (product.StockQuantity < item.Quantity)
+                    if(product.StockQuantity < item.Quantity)
                     {
                         return BadRequest($"Estoque insuficiente para o produto {product.Name}. Restam apenas {product.StockQuantity}.");
                     }
 
-                    item.UnitPrice = product.Price;
-                    total += item.UnitPrice * item.Quantity;
-                    
                     // Deduct stock
                     product.StockQuantity -= item.Quantity;
+
+                    // Set UnitPrice from current product price if not set
+                    if(item.UnitPrice == 0) item.UnitPrice = product.Price;
+                    
+                    total += item.UnitPrice * item.Quantity;
+                    
+                    if(companyId == null) companyId = product.CompanyId;
+                    else if(companyId != product.CompanyId)
+                    {
+                         // Basic check: all items should be from same company
+                         // return BadRequest("Pedidos devem conter itens de uma única empresa.");
+                    }
                 }
             }
 
-            if (companyId == null)
+            if(order.TotalAmount == 0) order.TotalAmount = total;
+            if(order.CompanyId == 0 && companyId.HasValue) order.CompanyId = companyId.Value;
+
+            // Create delivery record if needed
+            if(order.Delivery == null)
             {
-                return BadRequest("Order must contain valid products.");
+                 order.Delivery = new Delivery 
+                 { 
+                     Status = DeliveryStatus.Pending,
+                     Address = "Endereço do Cliente" // Should come from request
+                 };
             }
 
-            order.CompanyId = companyId.Value;
-            order.TotalAmount = total;
+             // Create payment record if needed
+            if(order.Payment == null)
+            {
+                 order.Payment = new Payment 
+                 { 
+                     Status = PaymentStatus.Pending,
+                     Method = PaymentMethod.CreditCard,
+                     Amount = total
+                 };
+            }
+
 
             _context.Order.Add(order);
             await _context.SaveChangesAsync();
 
-            // Envia notificação via RabbitMQ quando pedido é criado
-            _messageBus.PublishOrderNotification(
-                order.Id,
-                order.ClientId,
-                $"Seu pedido #{order.Id} foi recebido e está aguardando confirmação!",
-                "Pending"
-            );
+            // Publish message to RabbitMQ (or Fake)
+            _messageBus.PublishOrderNotification(order.Id, order.ClientId, $"Novo pedido criado: {order.Id} - Valor: {order.TotalAmount}", order.Status.ToString());
 
             return CreatedAtAction("GetOrder", new { id = order.Id }, order);
         }
 
-        // PUT: api/Orders/5/Status
-        [HttpPut("{id}/Status")]
-        public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] OrderStatusUpdateModel model)
-        {
-            var order = await _context.Order
-                .Include(o => o.Client)
-                .FirstOrDefaultAsync(o => o.Id == id);
-                
-            if (order == null)
-            {
-                return NotFound();
-            }
-
-            var oldStatus = order.Status;
-            order.Status = model.Status;
-            
-            if (model.Status == OrderStatus.Cancelled && !string.IsNullOrEmpty(model.RejectionReason))
-            {
-                order.RejectionReason = model.RejectionReason;
-            }
-
-            if (model.EstimatedDeliveryTime.HasValue)
-            {
-                order.EstimatedDeliveryTime = model.EstimatedDeliveryTime;
-            }
-            
-            await _context.SaveChangesAsync();
-
-            // Envia notificação via RabbitMQ quando status muda
-            var statusMessages = new Dictionary<OrderStatus, string>
-            {
-                { OrderStatus.Confirmed, $"Seu pedido #{order.Id} foi confirmado!" },
-                { OrderStatus.Preparation, $"Seu pedido #{order.Id} está sendo preparado!" },
-                { OrderStatus.ReadyForDelivery, $"Seu pedido #{order.Id} está pronto para entrega!" },
-                { OrderStatus.OutForDelivery, $"Seu pedido #{order.Id} saiu para entrega!" },
-                { OrderStatus.Delivered, $"Seu pedido #{order.Id} foi entregue! Obrigado pela preferência!" },
-                { OrderStatus.Cancelled, $"Seu pedido #{order.Id} foi cancelado. Motivo: {order.RejectionReason ?? "Não informado"}" },
-                { OrderStatus.Problem, $"Houve um problema com seu pedido #{order.Id}. Entraremos em contato em breve." }
-            };
-
-            if (statusMessages.ContainsKey(model.Status))
-            {
-                _messageBus.PublishOrderNotification(
-                    order.Id,
-                    order.ClientId,
-                    statusMessages[model.Status],
-                    model.Status.ToString()
-                );
-
-                _messageBus.PublishOrderStatusChange(
-                    order.Id,
-                    order.ClientId,
-                    model.Status.ToString(),
-                    order.EstimatedDeliveryTime
-                );
-            }
-
-            return Ok(order);
-        }
-
-        public class OrderStatusUpdateModel
-        {
-            public OrderStatus Status { get; set; }
-            public string? RejectionReason { get; set; }
-            public DateTime? EstimatedDeliveryTime { get; set; }
-        }
-        
-        // POST: api/Orders/5/Payment
-        [HttpPost("{id}/Payment")]
-        public async Task<IActionResult> AddPayment(Guid id, [FromBody] Payment payment)
+        // DELETE: api/Orders/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteOrder(int id)
         {
             var order = await _context.Order.FindAsync(id);
             if (order == null)
             {
                 return NotFound();
             }
+
+            _context.Order.Remove(order);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        // PUT: api/Orders/5/Status
+        [HttpPut("{id}/Status")]
+        public async Task<IActionResult> UpdateStatus(int id, [FromBody] ClickEntrega.Models.DTOs.UpdateOrderStatusDto dto)
+        {
+            var order = await _context.Order.FindAsync(id);
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            order.Status = dto.Status;
             
-            payment.OrderId = id;
-            payment.PaymentDate = DateTime.Now;
-            _context.Payment.Add(payment);
+            if (!string.IsNullOrEmpty(dto.RejectionReason))
+            {
+                order.RejectionReason = dto.RejectionReason;
+            }
+
+            if (dto.EstimatedDeliveryTime.HasValue)
+            {
+                order.EstimatedDeliveryTime = dto.EstimatedDeliveryTime;
+            }
+
             await _context.SaveChangesAsync();
             
-            return Ok(payment);
+            // Notify client (optional/mock)
+            string friendlyStatus = GetFriendlyStatusName(dto.Status);
+            _messageBus.PublishOrderNotification(order.Id, order.ClientId, $"Status do pedido: {friendlyStatus}", dto.Status.ToString());
+
+            return NoContent();
+        }
+
+        private string GetFriendlyStatusName(OrderStatus status)
+        {
+            return status switch
+            {
+                OrderStatus.Pending => "Pendente",
+                OrderStatus.Confirmed => "Confirmado",
+                OrderStatus.Preparation => "Em Preparo",
+                OrderStatus.ReadyForDelivery => "Pronto para Entrega",
+                OrderStatus.OutForDelivery => "Saiu para Entrega",
+                OrderStatus.Delivered => "Entregue",
+                OrderStatus.Cancelled => "Cancelado",
+                OrderStatus.Problem => "Problema",
+                _ => status.ToString()
+            };
+        }
+
+        private bool OrderExists(int id)
+        {
+            return _context.Order.Any(e => e.Id == id);
         }
     }
 }
-

@@ -23,7 +23,7 @@ namespace ClickEntrega.Controllers
 
         // GET: api/Products
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProduct([FromQuery] Guid? companyId)
+        public async Task<ActionResult<IEnumerable<Product>>> GetProduct([FromQuery] int? companyId)
         {
             var query = _context.Product
                 .Include(p => p.Category)
@@ -40,7 +40,7 @@ namespace ClickEntrega.Controllers
 
         // GET: api/Products/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> GetProduct(Guid id)
+        public async Task<ActionResult<Product>> GetProduct(int id)
         {
             var product = await _context.Product
                 .Include(p => p.Category)
@@ -57,7 +57,7 @@ namespace ClickEntrega.Controllers
 
         // PUT: api/Products/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProduct(Guid id, Product product)
+        public async Task<IActionResult> PutProduct(int id, Product product)
         {
             if (id != product.Id)
             {
@@ -97,7 +97,7 @@ namespace ClickEntrega.Controllers
 
         // DELETE: api/Products/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProduct(Guid id)
+        public async Task<IActionResult> DeleteProduct(int id)
         {
             var product = await _context.Product.FindAsync(id);
             if (product == null)
@@ -111,17 +111,9 @@ namespace ClickEntrega.Controllers
             return NoContent();
         }
 
-        // GET: api/Products/Category/5
-        [HttpGet("Category/{categoryId}")]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProductsByCategory(Guid categoryId)
-        {
-            return await _context.Product.Where(p => p.CategoryId == categoryId).ToListAsync();
-        }
-
-        private bool ProductExists(Guid id)
+        private bool ProductExists(int id)
         {
             return _context.Product.Any(e => e.Id == id);
         }
     }
 }
-

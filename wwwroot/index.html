@@ -25,6 +25,7 @@
                 <button onclick="app.showAdminDashboard()"><i class="fas fa-tachometer-alt"></i> Dashboard</button>
                 <button onclick="app.showProductRegistration()"><i class="fas fa-plus-circle"></i> Novo Produto</button>
                 <button onclick="app.showCategoryRegistration()"><i class="fas fa-tags"></i> Nova Categoria</button>
+                <a href="/swagger" target="_blank" class="nav-btn-link"><button><i class="fas fa-code"></i> API</button></a>
                 <button onclick="app.logout()" class="btn-sm"><i class="fas fa-sign-out-alt"></i> Sair</button>
             </nav>
         </div>
@@ -33,6 +34,8 @@
     <main id="main-content" class="container">
         <!-- Dynamic Content will be loaded here -->
     </main>
+
+    <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 3000; display: flex; flex-direction: column; gap: 10px;"></div>
 
     <!-- Templates -->
     <template id="login-selection-template">
@@ -49,6 +52,11 @@
                     <h3>Sou Empresa</h3>
                     <p>Gerenciar produtos e pedidos</p>
                 </div>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="/swagger" target="_blank" style="color: #666; text-decoration: none; font-size: 0.9em;">
+                    <i class="fas fa-code"></i> Documentação da API (Swagger)
+                </a>
             </div>
         </div>
     </template>
@@ -84,7 +92,7 @@
             </div>
             <div class="form-group">
                 <label class="required">Tipo de Empresa:</label>
-                <select id="new-company-type" class="required" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                <select id="new-company-type" class="required" onchange="app.toggleOtherTypeField()" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
                     <option value="">Selecione...</option>
                     <option value="Pizzaria">Pizzaria</option>
                     <option value="Hamburgueria">Hamburgueria</option>
@@ -92,6 +100,11 @@
                     <option value="Restaurante">Restaurante</option>
                     <option value="Outro">Outro</option>
                 </select>
+                <span class="field-error">Este campo é obrigatório</span>
+            </div>
+            <div class="form-group" id="other-type-container" style="display: none;">
+                <label class="required">Qual o tipo?</label>
+                <input type="text" id="new-company-type-manual" placeholder="Ex: Doceria">
                 <span class="field-error">Este campo é obrigatório</span>
             </div>
             <div class="form-group">
@@ -154,6 +167,16 @@
             </div>
             <div id="admin-courier-list" class="table-container">
                 Carregando entregadores...
+            </div>
+        </div>
+
+        <div id="admin-content-reviews" class="admin-tab-content" style="display: none;">
+            <div class="section-header">
+                <h3>Avaliações de Clientes</h3>
+                <button onclick="app.loadAdminReviews()" class="btn-sm"><i class="fas fa-sync"></i> Atualizar</button>
+            </div>
+            <div id="admin-review-list" class="order-list">
+                Carregando avaliações...
             </div>
         </div>
     </template>
@@ -292,10 +315,11 @@
         </div>
 
         <div id="client-dashboard" style="display: none;">
-            <div class="user-header">
-                <h2 id="welcome-msg">Bem-vindo!</h2>
+            <div class="user-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <h2 id="welcome-msg" style="margin: 0;">Bem-vindo!</h2>
+                <button onclick="app.showCompanyTypes()" class="btn-primary"><i class="fas fa-utensils"></i> Ver Menu</button>
             </div>
-            <h3>Meus Pedidos</h3>
+            <h3 style="margin-top: 20px;">Meus Pedidos</h3>
             <div id="order-history" class="order-list"></div>
         </div>
     </template>
