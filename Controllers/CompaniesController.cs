@@ -36,7 +36,7 @@ namespace ClickEntrega.Controllers
 
         // GET: api/Companies/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Company>> GetCompany(int id)
+        public async Task<ActionResult<Company>> GetCompany(Guid id)
         {
             var company = await _context.Company.FindAsync(id);
 
@@ -80,7 +80,7 @@ namespace ClickEntrega.Controllers
 
         // DELETE: api/Companies/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCompany(int id)
+        public async Task<IActionResult> DeleteCompany(Guid id)
         {
             var company = await _context.Company.FindAsync(id);
             if (company == null)
@@ -94,9 +94,10 @@ namespace ClickEntrega.Controllers
             return NoContent();
         }
 
-        private bool CompanyExists(int id)
+        private bool CompanyExists(Guid id)
         {
             return _context.Company.Any(e => e.Id == id);
         }
     }
 }
+

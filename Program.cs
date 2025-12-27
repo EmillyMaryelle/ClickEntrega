@@ -10,9 +10,6 @@ namespace ClickEntrega
     {
         public static void Main(string[] args)
         {
-            // Fix for PostgreSQL timestamp issue
-            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-
             var builder = WebApplication.CreateBuilder(args);
             var connectionString = builder.Configuration.GetConnectionString("ClickEntregaContext") 
                 ?? throw new InvalidOperationException("Connection string 'ClickEntregaContext' not found.");

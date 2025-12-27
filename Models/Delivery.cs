@@ -4,11 +4,11 @@ namespace ClickEntrega.Models
 {
     public class Delivery
     {
-        public int Id { get; set; }
-        public int OrderId { get; set; }
+        public Guid Id { get; set; }
+        public Guid OrderId { get; set; }
         public Order? Order { get; set; }
         
-        public int? CourierId { get; set; }
+        public Guid? CourierId { get; set; }
         public Courier? Courier { get; set; }
         
         public string Address { get; set; } = string.Empty;
@@ -27,3 +27,4 @@ namespace ClickEntrega.Models
         Failed
     }
 }
+

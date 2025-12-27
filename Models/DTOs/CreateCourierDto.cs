@@ -9,6 +9,6 @@ namespace ClickEntrega.Models.DTOs
         public string VehicleInfo { get; set; } = string.Empty;
         public string Phone { get; set; } = string.Empty;
         [Required]
-        public int CompanyId { get; set; }
+        public Guid CompanyId { get; set; }
     }
 }

@@ -23,7 +23,7 @@ namespace ClickEntrega.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Courier>>> GetCouriers([FromQuery] int? companyId)
+        public async Task<ActionResult<IEnumerable<Courier>>> GetCouriers([FromQuery] Guid? companyId)
         {
             var query = _context.Courier.AsQueryable();
 
@@ -36,7 +36,7 @@ namespace ClickEntrega.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Courier>> GetCourier(int id)
+        public async Task<ActionResult<Courier>> GetCourier(Guid id)
         {
             var courier = await _context.Courier.FindAsync(id);
 
@@ -65,7 +65,7 @@ namespace ClickEntrega.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCourier(int id, Courier courier)
+        public async Task<IActionResult> PutCourier(Guid id, Courier courier)
         {
             if (id != courier.Id)
             {
@@ -94,7 +94,7 @@ namespace ClickEntrega.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCourier(int id)
+        public async Task<IActionResult> DeleteCourier(Guid id)
         {
             var courier = await _context.Courier.FindAsync(id);
             if (courier == null)
@@ -108,7 +108,7 @@ namespace ClickEntrega.Controllers
             return NoContent();
         }
 
-        private bool CourierExists(int id)
+        private bool CourierExists(Guid id)
         {
             return _context.Courier.Any(e => e.Id == id);
         }

@@ -23,24 +23,14 @@ namespace ClickEntrega.Controllers
 
         // GET: api/Reviews
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Review>>> GetReviews([FromQuery] int? companyId)
+        public async Task<ActionResult<IEnumerable<Review>>> GetReviews()
         {
-            var query = _context.Review
-                .Include(r => r.Client)
-                .Include(r => r.Order)
-                .AsQueryable();
-
-            if (companyId.HasValue)
-            {
-                query = query.Where(r => r.Order != null && r.Order.CompanyId == companyId);
-            }
-
-            return await query.OrderByDescending(r => r.Date).ToListAsync();
+            return await _context.Review.Include(r => r.Client).ToListAsync();
         }
 
         // GET: api/Reviews/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Review>> GetReview(int id)
+        public async Task<ActionResult<Review>> GetReview(Guid id)
         {
             var review = await _context.Review.Include(r => r.Client).FirstOrDefaultAsync(r => r.Id == id);
 
@@ -65,7 +55,7 @@ namespace ClickEntrega.Controllers
 
         // DELETE: api/Reviews/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteReview(int id)
+        public async Task<IActionResult> DeleteReview(Guid id)
         {
             var review = await _context.Review.FindAsync(id);
             if (review == null)

@@ -145,8 +145,8 @@ namespace ClickEntrega.Services
 
         private class NotificationMessage
         {
-            public int OrderId { get; set; }
-            public int ClientId { get; set; }
+            public Guid OrderId { get; set; }
+            public Guid ClientId { get; set; }
             public string Message { get; set; } = string.Empty;
             public string? OrderStatus { get; set; }
             public DateTime Timestamp { get; set; }

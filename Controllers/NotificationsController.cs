@@ -26,7 +26,7 @@ namespace ClickEntrega.Controllers
 
         // GET: api/Notifications/Client/5
         [HttpGet("Client/{clientId}")]
-        public async Task<ActionResult<IEnumerable<Notification>>> GetClientNotifications(int clientId)
+        public async Task<ActionResult<IEnumerable<Notification>>> GetClientNotifications(Guid clientId)
         {
             try
             {
@@ -48,10 +48,10 @@ namespace ClickEntrega.Controllers
         {
             // Se a notificação já tem ID, significa que foi criada diretamente no banco
             // Caso contrário, publica via RabbitMQ para processamento assíncrono
-            if (notification.Id == 0)
+            if (notification.Id == Guid.Empty)
             {
                 _messageBus.PublishOrderNotification(
-                    notification.OrderId ?? 0,
+                    notification.OrderId ?? Guid.Empty,
                     notification.ClientId,
                     notification.Message
                 );
@@ -69,7 +69,7 @@ namespace ClickEntrega.Controllers
 
         // PUT: api/Notifications/5/Read
         [HttpPut("{id}/Read")]
-        public async Task<IActionResult> MarkAsRead(int id)
+        public async Task<IActionResult> MarkAsRead(Guid id)
         {
             var notification = await _context.Notification.FindAsync(id);
             if (notification == null)

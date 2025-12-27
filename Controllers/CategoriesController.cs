@@ -22,7 +22,7 @@ namespace ClickEntrega.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Category>>> GetCategories([FromQuery] int? companyId)
+        public async Task<ActionResult<IEnumerable<Category>>> GetCategories([FromQuery] Guid? companyId)
         {
             var query = _context.Category.Include(c => c.SubCategories).AsQueryable();
 
@@ -44,7 +44,7 @@ namespace ClickEntrega.Controllers
 
         // PUT: api/Categories/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCategory(int id, Category category)
+        public async Task<IActionResult> PutCategory(Guid id, Category category)
         {
             if (id != category.Id)
             {
@@ -74,7 +74,7 @@ namespace ClickEntrega.Controllers
 
         // DELETE: api/Categories/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCategory(int id)
+        public async Task<IActionResult> DeleteCategory(Guid id)
         {
             var category = await _context.Category.FindAsync(id);
             if (category == null)
@@ -88,9 +88,10 @@ namespace ClickEntrega.Controllers
             return NoContent();
         }
 
-        private bool CategoryExists(int id)
+        private bool CategoryExists(Guid id)
         {
             return _context.Category.Any(e => e.Id == id);
         }
     }
 }
+

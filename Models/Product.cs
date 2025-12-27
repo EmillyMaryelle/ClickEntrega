@@ -4,7 +4,7 @@ namespace ClickEntrega.Models
 {
     public class Product
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         [Required]
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
@@ -12,10 +12,11 @@ namespace ClickEntrega.Models
         public string ImageUrl { get; set; } = string.Empty;
         public int StockQuantity { get; set; }
         
-        public int CategoryId { get; set; }
+        public Guid CategoryId { get; set; }
         public Category? Category { get; set; }
 
-        public int CompanyId { get; set; }
+        public Guid CompanyId { get; set; }
         public Company? Company { get; set; }
     }
 }
+
