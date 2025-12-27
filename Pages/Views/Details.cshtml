@@ -1,0 +1,37 @@
+﻿@page
+@model ApiProductsRest.Pages.Views.DetailsModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Visualize os detalhes do seu produto:</h1>
+
+<div>
+    <h4>Dados:</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Mapper.Nome)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Mapper.Nome)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Mapper.Descricao)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Mapper.Descricao)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Mapper.Preco)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Mapper.Preco)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-page="./Edit" asp-route-id="@Model.Mapper?.Id">Edit</a> |
+    <a asp-page="./Index">Retorne a pagina inicial</a>
+</div>
